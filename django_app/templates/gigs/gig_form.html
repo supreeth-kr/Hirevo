@@ -1,0 +1,22 @@
+{% extends 'partials/base.html' %}
+{% block title %} - Create Gig{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:700px">
+  <h2 class="fw-bold mb-4">Create a New Gig</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="mb-3">
+      <label class="form-label fw-semibold">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Extra Image URLs</label>
+      <input type="text" name="extra_images" class="form-control" placeholder="Comma separated image URLs">
+    </div>
+    <button class="btn btn-success px-5">Publish Gig</button>
+  </form>
+</div>
+{% endblock %}

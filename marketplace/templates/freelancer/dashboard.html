@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Freelancer Dashboard - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <!-- Freelancer Sidebar -->
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-success bg-opacity-10 text-success small">Freelancer Portal</span>
+      </div>
+
+      <nav class="d-flex flex-column">
+        <a href="{% url 'freelancer_dashboard' %}" class="sidebar-nav-item active">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a href="{% url 'freelancer_gigs' %}" class="sidebar-nav-item">
+          <i class="bi bi-collection"></i> My Gigs
+        </a>
+        <a href="{% url 'freelancer_gig_create' %}" class="sidebar-nav-item">
+          <i class="bi bi-plus-square"></i> Create New Gig
+        </a>
+        <a href="{% url 'freelancer_orders' %}" class="sidebar-nav-item">
+          <i class="bi bi-list-task"></i> Orders & Projects
+        </a>
+        <a href="{% url 'freelancer_backup_assignments' %}" class="sidebar-nav-item position-relative">
+          <i class="bi bi-shield-check text-info"></i> Backup Assignments
+          {% if backup_count > 0 %}
+            <span class="badge bg-danger rounded-pill ms-auto">{{ backup_count }}</span>
+          {% endif %}
+        </a>
+        <a href="{% url 'messages_inbox' %}" class="sidebar-nav-item">
+          <i class="bi bi-chat-dots"></i> Messages
+        </a>
+        <a href="{% url 'freelancer_earnings' %}" class="sidebar-nav-item">
+          <i class="bi bi-wallet2"></i> Earnings & Penalties
+        </a>
+        <a href="{% url 'freelancer_portfolio' %}" class="sidebar-nav-item">
+          <i class="bi bi-images"></i> Portfolio
+        </a>
+        <a href="{% url 'freelancer_certificates' %}" class="sidebar-nav-item">
+          <i class="bi bi-award"></i> Certificates
+        </a>
+        <a href="{% url 'freelancer_profile' %}" class="sidebar-nav-item">
+          <i class="bi bi-person-gear"></i> Profile Settings
+        </a>
+        <a href="{% url 'freelancer_verification' %}" class="sidebar-nav-item">
+          <i class="bi bi-patch-check"></i> Identity Verification
+        </a>
+        <a href="{% url 'freelancer_public_profile' user.id %}" class="sidebar-nav-item" target="_blank">
+          <i class="bi bi-box-arrow-up-right"></i> View Public Profile
+        </a>
+        <a href="{% url 'logout' %}" class="sidebar-nav-item text-danger mt-3">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-content">
+      {% if not verification or verification.status != 'approved' %}
+        <div class="alert alert-warning shadow-sm mb-4">
+          <i class="bi bi-shield-exclamation me-1"></i>
+          {% if verification and verification.status == 'pending' %}
+            Your ID and selfie verification is pending review. You cannot publish new gigs until it is approved.
+          {% else %}
+            Verify your identity with a government ID and live selfie before publishing gigs.
+          {% endif %}
+          <a href="{% url 'freelancer_verification' %}" class="alert-link ms-1">Open verification</a>
+        </div>
+      {% endif %}
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="h3 fw-bold mb-1">Freelancer Workspace</h2>
+          <p class="text-muted small mb-0">Track project milestones, earnings, customer reviews, and backup assignments.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{% url 'freelancer_gig_create' %}" class="btn btn-hirevo btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Create Gig
+          </a>
+        </div>
+      </div>
+
+      <!-- Backup Request Banner if pending -->
+      {% if backup_count > 0 %}
+        <div class="alert alert-info shadow-sm mb-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-shield-exclamation fs-4 text-info"></i>
+              <div>
+                <strong>You have {{ backup_count }} pending Backup Project Assignment{{ backup_count|pluralize }}!</strong>
+                <div class="small text-muted">Administrator has assigned you to continue an overdue project.</div>
+              </div>
+            </div>
+            <a href="{% url 'freelancer_backup_assignments' %}" class="btn btn-info btn-sm text-white fw-bold">
+              Review Assignments &rarr;
+            </a>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- KPI Summary Row -->
+      <div class="row g-2 mb-4 flex-nowrap" style="overflow-x: auto; padding-bottom: 5px;">
+        <div class="col">
+          <div class="stat-kpi-card h-100 p-3" style="min-width: 135px;">
+            <div class="text-muted fw-semibold" style="font-size: 0.85rem;">Net Earnings</div>
+            <div class="h4 fw-bold text-success mt-1 mb-0">₹{{ earnings.net_earnings }}</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="stat-kpi-card h-100 p-3" style="min-width: 135px;">
+            <div class="text-muted fw-semibold" style="font-size: 0.85rem;">Extra Revisions</div>
+            <div class="h4 fw-bold text-success mt-1 mb-0">₹{{ earnings.extra_revisions }}</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="stat-kpi-card h-100 p-3" style="min-width: 135px;">
+            <div class="text-muted fw-semibold" style="font-size: 0.85rem;">In Escrow</div>
+            <div class="h4 fw-bold text-primary mt-1 mb-0">₹{{ earnings.pending }}</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="stat-kpi-card h-100 p-3" style="min-width: 135px;">
+            <div class="text-muted fw-semibold" style="font-size: 0.85rem;">Active Orders</div>
+            <div class="h4 fw-bold text-indigo mt-1 mb-0">{{ active_orders }}</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="stat-kpi-card h-100 p-3" style="min-width: 135px;">
+            <div class="text-muted fw-semibold" style="font-size: 0.85rem;">Completed</div>
+            <div class="h4 fw-bold text-dark mt-1 mb-0">{{ completed_orders }}</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="stat-kpi-card h-100 p-3" style="min-width: 135px;">
+            <div class="text-muted fw-semibold" style="font-size: 0.85rem;">Rating</div>
+            <div class="h4 fw-bold text-warning mt-1 mb-0"><i class="bi bi-star-fill"></i> {{ profile.avg_rating|default:"5.0" }}</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="stat-kpi-card h-100 p-3" style="min-width: 135px;">
+            <div class="text-muted fw-semibold" style="font-size: 0.85rem;">Active Gigs</div>
+            <div class="h4 fw-bold text-dark mt-1 mb-0">{{ gigs_count }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Orders Table -->
+      <div class="hirevo-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0">Recent Client Orders</h5>
+          <a href="{% url 'freelancer_orders' %}" class="small text-decoration-none text-success fw-semibold">All Orders</a>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>Order ID</th>
+                <th>Client</th>
+                <th>Gig Title</th>
+                <th>Package</th>
+                <th>Amount</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody class="small">
+              {% for order in recent_orders %}
+                <tr>
+                  <td class="fw-bold text-primary">{{ order.order_id }}</td>
+                  <td class="fw-semibold">{{ order.client.username }}</td>
+                  <td class="text-truncate" style="max-width: 180px;">{{ order.gig.title }}</td>
+                  <td><span class="badge bg-light text-dark border">{{ order.package.name }}</span></td>
+                  <td class="fw-bold text-success">₹{{ order.price }}</td>
+                  <td class="text-muted">{{ order.deadline|date:"d M Y, H:i"|default:"TBD" }}</td>
+                  <td>
+                    <span class="badge-status {{ order.status }}">{{ order.get_status_display }}</span>
+                  </td>
+                  <td>
+                    <a href="{% url 'freelancer_order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+                      Manage &rarr;
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="8" class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                    No orders received yet. Make sure your <a href="{% url 'freelancer_gigs' %}">gigs are active</a>!
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

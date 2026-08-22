@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Delayed Projects Management - Hirevo Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-danger bg-opacity-10 text-danger small">Admin Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'admin_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'admin_delayed_projects' %}" class="sidebar-nav-item active"><i class="bi bi-exclamation-octagon text-danger"></i> Delayed Projects</a>
+        <a href="{% url 'admin_backup_assignments' %}" class="sidebar-nav-item"><i class="bi bi-shield-check text-info"></i> Backup Assignments</a>
+        <a href="{% url 'admin_penalties' %}" class="sidebar-nav-item"><i class="bi bi-percent text-warning"></i> Penalties (5%)</a>
+        <a href="{% url 'admin_orders' %}" class="sidebar-nav-item"><i class="bi bi-receipt"></i> Orders Monitor</a>
+        <a href="{% url 'admin_users' %}" class="sidebar-nav-item"><i class="bi bi-people"></i> All Users</a>
+        <a href="{% url 'admin_freelancers' %}" class="sidebar-nav-item"><i class="bi bi-laptop"></i> Freelancers</a>
+        <a href="{% url 'admin_clients' %}" class="sidebar-nav-item"><i class="bi bi-briefcase"></i> Clients</a>
+        <a href="{% url 'admin_gigs' %}" class="sidebar-nav-item"><i class="bi bi-collection"></i> Marketplace Gigs</a>
+        <a href="{% url 'admin_categories' %}" class="sidebar-nav-item"><i class="bi bi-tags"></i> Categories</a>
+        <a href="{% url 'admin_payments' %}" class="sidebar-nav-item"><i class="bi bi-credit-card"></i> Payments</a>
+        <a href="{% url 'admin_reviews' %}" class="sidebar-nav-item"><i class="bi bi-star"></i> Reviews Moderation</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold mb-1 text-danger"><i class="bi bi-clock-history me-1"></i> Overdue & Delayed Projects</h3>
+          <p class="text-muted small mb-0">Automatic delay watcher identified these projects as past their deadline without final approved delivery.</p>
+        </div>
+      </div>
+
+      <div class="hirevo-card p-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>Order ID</th>
+                <th>Client</th>
+                <th>Primary Freelancer</th>
+                <th>Gig Title</th>
+                <th>Order Value</th>
+                <th>Target Deadline</th>
+                <th>Overdue</th>
+                <th>5% Penalty</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody class="small">
+              {% for order in delayed_orders %}
+                <tr>
+                  <td class="fw-bold text-danger">{{ order.order_id }}</td>
+                  <td>{{ order.client.username }}</td>
+                  <td>
+                    <a href="{% url 'freelancer_public_profile' order.freelancer.id %}" target="_blank" class="fw-bold text-dark text-decoration-none">
+                      {{ order.freelancer.username }}
+                    </a>
+                  </td>
+                  <td class="text-truncate" style="max-width: 180px;">{{ order.gig.title }}</td>
+                  <td class="fw-bold">₹{{ order.price }}</td>
+                  <td class="text-danger fw-semibold">{{ order.deadline|date:"d M Y, H:i" }}</td>
+                  <td><span class="badge bg-danger">{{ order.days_delayed }} day{{ order.days_delayed|pluralize }}</span></td>
+                  <td>
+                    <span class="badge bg-danger bg-opacity-10 text-danger fw-bold">
+                      ₹{{ order.penalty.penalty_amount|default:"Calculated" }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <a href="{% url 'admin_assign_backup' order.id %}" class="btn btn-sm btn-danger fw-bold">
+                        <i class="bi bi-person-plus-fill me-1"></i> Assign Backup
+                      </a>
+                      <a href="{% url 'admin_order_detail' order.id %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="9" class="text-center py-5 text-muted">
+                    <i class="bi bi-check-circle fs-1 text-success d-block mb-2"></i>
+                    All active orders are on schedule! No delayed projects detected.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

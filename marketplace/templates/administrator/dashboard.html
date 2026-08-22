@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Administrator Dashboard - Hirevo Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <!-- Admin Sidebar -->
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-danger bg-opacity-10 text-danger small"><i class="bi bi-shield-lock me-1"></i> Admin Portal</span>
+      </div>
+
+      <nav class="d-flex flex-column">
+        <a href="{% url 'admin_dashboard' %}" class="sidebar-nav-item active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'admin_delayed_projects' %}" class="sidebar-nav-item position-relative">
+          <i class="bi bi-exclamation-octagon text-danger"></i> Delayed Projects
+          {% if stats.delayed_orders > 0 %}
+            <span class="badge bg-danger rounded-pill ms-auto">{{ stats.delayed_orders }}</span>
+          {% endif %}
+        </a>
+        <a href="{% url 'admin_backup_assignments' %}" class="sidebar-nav-item"><i class="bi bi-shield-check text-info"></i> Backup Assignments</a>
+        <a href="{% url 'admin_penalties' %}" class="sidebar-nav-item"><i class="bi bi-percent text-warning"></i> Penalties (5%)</a>
+        <a href="{% url 'admin_orders' %}" class="sidebar-nav-item"><i class="bi bi-receipt"></i> Orders Monitor</a>
+        <a href="{% url 'admin_users' %}" class="sidebar-nav-item"><i class="bi bi-people"></i> All Users</a>
+        <a href="{% url 'admin_freelancers' %}" class="sidebar-nav-item"><i class="bi bi-laptop"></i> Freelancers</a>
+        <a href="{% url 'admin_verifications' %}" class="sidebar-nav-item"><i class="bi bi-patch-check"></i> Identity Verifications</a>
+        <a href="{% url 'admin_clients' %}" class="sidebar-nav-item"><i class="bi bi-briefcase"></i> Clients</a>
+        <a href="{% url 'admin_gigs' %}" class="sidebar-nav-item"><i class="bi bi-collection"></i> Marketplace Gigs</a>
+        <a href="{% url 'admin_categories' %}" class="sidebar-nav-item"><i class="bi bi-tags"></i> Categories</a>
+        <a href="{% url 'admin_payments' %}" class="sidebar-nav-item"><i class="bi bi-credit-card"></i> Payments</a>
+        <a href="{% url 'admin_reviews' %}" class="sidebar-nav-item"><i class="bi bi-star"></i> Reviews Moderation</a>
+        <a href="{% url 'logout' %}" class="sidebar-nav-item text-danger mt-3"><i class="bi bi-box-arrow-right"></i> Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Admin Main Content -->
+    <main class="dashboard-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="h3 fw-bold mb-1">Platform Operations Dashboard</h2>
+          <p class="text-muted small mb-0">Live monitoring of users, orders, delay detection, penalties, and continuity assignments.</p>
+        </div>
+        <div>
+          <a href="{% url 'admin_delayed_projects' %}" class="btn btn-outline-danger btn-sm fw-bold">
+            <i class="bi bi-clock-history me-1"></i> Review Delayed Projects ({{ stats.delayed_orders }})
+          </a>
+        </div>
+      </div>
+
+      <!-- KPI Metric Row -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3 col-lg-2">
+          <div class="stat-kpi-card">
+            <div class="text-muted small fw-semibold">Total Users</div>
+            <div class="h3 fw-bold text-dark mb-0">{{ stats.total_users }}</div>
+            <div class="text-muted" style="font-size: 0.7rem;">{{ stats.total_clients }} clients / {{ stats.total_freelancers }} talent</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <div class="stat-kpi-card">
+            <div class="text-muted small fw-semibold">Active Gigs</div>
+            <div class="h3 fw-bold text-primary mb-0">{{ stats.total_gigs }}</div>
+            <div class="text-muted" style="font-size: 0.7rem;">Catalog listings</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <div class="stat-kpi-card">
+            <div class="text-muted small fw-semibold">Total Orders</div>
+            <div class="h3 fw-bold text-indigo mb-0">{{ stats.total_orders }}</div>
+            <div class="text-muted" style="font-size: 0.7rem;">{{ stats.active_orders }} in progress</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <div class="stat-kpi-card border-danger border-opacity-50">
+            <div class="text-muted small fw-semibold">Delayed Orders</div>
+            <div class="h3 fw-bold text-danger mb-0">{{ stats.delayed_orders }}</div>
+            <div class="text-danger" style="font-size: 0.7rem;">Needs backup assign</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <div class="stat-kpi-card">
+            <div class="text-muted small fw-semibold">Total Payments</div>
+            <div class="h3 fw-bold text-success mb-0">₹{{ stats.total_payments }}</div>
+            <div class="text-muted" style="font-size: 0.7rem;">Escrow volume</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <div class="stat-kpi-card">
+            <div class="text-muted small fw-semibold">Penalties Applied</div>
+            <div class="h3 fw-bold text-warning mb-0">₹{{ stats.total_penalties }}</div>
+            <div class="text-muted" style="font-size: 0.7rem;">5% auto delay fee</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delayed Projects Warning Section -->
+      {% if delayed_projects %}
+        <div class="hirevo-card p-4 mb-4 border-start border-4 border-danger shadow-sm">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h5 class="fw-bold text-danger mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> Overdue Projects Requiring Action</h5>
+              <div class="text-muted small">Missed deadline detected by automated watcher. Choose a qualified backup freelancer to preserve project continuity.</div>
+            </div>
+            <a href="{% url 'admin_delayed_projects' %}" class="btn btn-danger btn-sm fw-bold">View All Delayed</a>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light small">
+                <tr>
+                  <th>Order ID</th>
+                  <th>Client</th>
+                  <th>Primary Freelancer</th>
+                  <th>Amount</th>
+                  <th>Deadline</th>
+                  <th>Days Overdue</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody class="small">
+                {% for d in delayed_projects %}
+                  <tr>
+                    <td class="fw-bold text-danger">{{ d.order_id }}</td>
+                    <td>{{ d.client.username }}</td>
+                    <td class="fw-bold text-dark">{{ d.freelancer.username }}</td>
+                    <td class="fw-bold">₹{{ d.price }}</td>
+                    <td class="text-danger fw-semibold">{{ d.deadline|date:"d M Y, H:i" }}</td>
+                    <td><span class="badge bg-danger">{{ d.days_delayed }} days</span></td>
+                    <td>
+                      <a href="{% url 'admin_assign_backup' d.id %}" class="btn btn-sm btn-danger fw-bold">
+                        <i class="bi bi-person-plus-fill me-1"></i> Assign Backup
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Recent Orders & Recent Users -->
+      <div class="row g-4 mb-4">
+        <!-- Recent Orders -->
+        <div class="col-lg-7">
+          <div class="hirevo-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Recent Orders</h5>
+              <a href="{% url 'admin_orders' %}" class="small text-decoration-none text-muted">All Orders</a>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Client</th>
+                    <th>Freelancer</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Manage</th>
+                  </tr>
+                </thead>
+                <tbody class="small">
+                  {% for order in recent_orders %}
+                    <tr>
+                      <td class="fw-bold text-primary">{{ order.order_id }}</td>
+                      <td>{{ order.client.username }}</td>
+                      <td>{{ order.freelancer.username }}</td>
+                      <td class="fw-bold text-success">₹{{ order.price }}</td>
+                      <td><span class="badge-status {{ order.status }}">{{ order.get_status_display }}</span></td>
+                      <td>
+                        <a href="{% url 'admin_order_detail' order.id %}" class="btn btn-sm btn-outline-secondary">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr><td colspan="6" class="text-center py-3 text-muted">No orders found.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Registered Users -->
+        <div class="col-lg-5">
+          <div class="hirevo-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Recently Joined Users</h5>
+              <a href="{% url 'admin_users' %}" class="small text-decoration-none text-muted">All Users</a>
+            </div>
+
+            <div class="d-flex flex-column gap-2">
+              {% for u in recent_users %}
+                <div class="p-2 rounded bg-light border d-flex justify-content-between align-items-center small">
+                  <div>
+                    <div class="fw-bold text-dark">{{ u.full_name|default:u.username }} (@{{ u.username }})</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ u.email }} &bull; {{ u.date_joined|date:"d M Y" }}</div>
+                  </div>
+                  <span class="badge {% if u.role == 'freelancer' %}bg-success{% elif u.role == 'client' %}bg-primary{% else %}bg-danger{% endif %} text-capitalize">
+                    {{ u.role }}
+                  </span>
+                </div>
+              {% empty %}
+                <div class="text-center text-muted py-3 small">No users registered yet.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+{% endblock %}

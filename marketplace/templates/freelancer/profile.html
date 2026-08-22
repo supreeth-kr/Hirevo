@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Freelancer Profile Settings - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-success bg-opacity-10 text-success small">Freelancer Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'freelancer_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'freelancer_gigs' %}" class="sidebar-nav-item"><i class="bi bi-collection"></i> My Gigs</a>
+        <a href="{% url 'freelancer_orders' %}" class="sidebar-nav-item"><i class="bi bi-list-task"></i> Orders</a>
+        <a href="{% url 'freelancer_portfolio' %}" class="sidebar-nav-item"><i class="bi bi-images"></i> Portfolio</a>
+        <a href="{% url 'freelancer_certificates' %}" class="sidebar-nav-item"><i class="bi bi-award"></i> Certificates</a>
+        <a href="{% url 'freelancer_profile' %}" class="sidebar-nav-item active"><i class="bi bi-person-gear"></i> Profile Settings</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <div class="hirevo-card p-4 p-md-5 max-w-800 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+          <h4 class="fw-bold mb-0">Professional Freelancer Profile</h4>
+          <a href="{% url 'freelancer_public_profile' user.id %}" target="_blank" class="btn btn-hirevo-outline btn-sm">
+            <i class="bi bi-eye me-1"></i> Preview Public Profile
+          </a>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Full Name</label>
+              <input type="text" name="full_name" class="form-control" value="{{ user.full_name }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Email Address</label>
+              <input type="email" class="form-control bg-light" value="{{ user.email }}" readonly>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label small fw-semibold" for="{{ form.hourly_rate.id_for_label }}">Hourly Rate (₹/hr)</label>
+              {{ form.hourly_rate }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-semibold" for="{{ form.experience_years.id_for_label }}">Years of Experience</label>
+              {{ form.experience_years }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-semibold" for="{{ form.availability.id_for_label }}">Availability Status</label>
+              {{ form.availability }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold" for="{{ form.bio.id_for_label }}">Professional Bio</label>
+            {{ form.bio }}
+            <div class="form-text small">Explain your expertise, services, and why clients should choose you.</div>
+          </div>
+
+          <!-- Skills Checkbox Selection -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Skills & Technologies (Select all that apply)</label>
+            <div class="p-3 bg-light rounded border" style="max-height: 180px; overflow-y: auto;">
+              <div class="row row-cols-2 row-cols-md-3 g-2">
+                {% for pk, choice in form.skills.field.choices %}
+                  <div class="col">
+                    <div class="form-check">
+                      <input type="checkbox" name="skills" value="{{ pk }}" class="form-check-input" id="skill_{{ pk }}"
+                        {% if pk in form.skills.value or pk|stringformat:'s' in form.skills.value|stringformat:'s' %}checked{% endif %}>
+                      <label class="form-check-label small" for="skill_{{ pk }}">{{ choice }}</label>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold" for="{{ form.languages.id_for_label }}">Languages Spoken</label>
+              {{ form.languages }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold" for="{{ form.location.id_for_label }}">Location / City</label>
+              {{ form.location }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold" for="{{ form.education.id_for_label }}">Education & Certifications Summary</label>
+            {{ form.education }}
+          </div>
+
+          <div class="row g-3 mb-4 align-items-center">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold" for="{{ form.website.id_for_label }}">Portfolio Website URL</label>
+              {{ form.website }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold" for="{{ form.profile_picture.id_for_label }}">Profile Picture</label>
+              {{ form.profile_picture }}
+              {% if profile.profile_picture %}
+                <div class="mt-2">
+                  <img src="{{ profile.profile_picture.url }}" class="rounded-circle border" style="width: 50px; height: 50px; object-fit: cover;">
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-hirevo px-4 py-2 fw-bold">Save Profile Settings</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

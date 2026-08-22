@@ -1,0 +1,59 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+  <div style="text-align: center; margin-bottom: 24px;">
+    <div style="display: inline-block; padding: 6px 16px; border-radius: 20px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; font-weight: 700; font-size: 12px; text-transform: uppercase; margin-bottom: 12px;">
+      New Project Assignment
+    </div>
+    <h2 style="color: #ffffff; margin: 0 0 8px 0; font-size: 20px; font-weight: 700;">You've Been Assigned a New Order!</h2>
+    <p style="color: #94a3b8; margin: 0; font-size: 14px;">A client has purchased your gig package and assigned the project to you.</p>
+  </div>
+
+  <p>Hello <strong>{{ user.full_name|default:user.username }}</strong>,</p>
+  <p>You have received a new order for <strong>{{ order.gig.title }}</strong> from client <strong>{{ counterpart.full_name|default:counterpart.username }}</strong>.</p>
+
+  <div class="info-card">
+    <table class="info-table">
+      <tr>
+        <td class="info-label">Order ID</td>
+        <td class="info-value"><span style="color: #10b981; font-family: monospace;">{{ order.order_id }}</span></td>
+      </tr>
+      <tr>
+        <td class="info-label">Gig / Service</td>
+        <td class="info-value">{{ order.gig.title }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Package Tier</td>
+        <td class="info-value">{{ order.package.name }} ({{ order.package.get_tier_display }})</td>
+      </tr>
+      <tr>
+        <td class="info-label">Order Value</td>
+        <td class="info-value">&#8377;{{ order.price }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Client Name</td>
+        <td class="info-value">{{ counterpart.full_name|default:counterpart.username }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Delivery Deadline</td>
+        <td class="info-value" style="color: #38bdf8;">{{ order.deadline|date:"d M Y, h:i A"|default:"Calculated upon activation" }}</td>
+      </tr>
+      {% if order.requirements %}
+      <tr>
+        <td class="info-label">Project Scope</td>
+        <td class="info-value" style="font-weight: normal; color: #cbd5e1;">{{ order.requirements|truncatechars:180 }}</td>
+      </tr>
+      {% endif %}
+    </table>
+  </div>
+
+  <div style="text-align: center; margin: 24px 0;">
+    <a href="{{ project_url }}" class="btn-primary">Open Project & Respond</a>
+  </div>
+
+  <div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 6px; margin-top: 16px;">
+    <p style="margin: 0; font-size: 13px; color: #fbbf24;">
+      <strong>Important Reminder:</strong> Please accept the order and begin work to ensure timely completion before the deadline.
+    </p>
+  </div>
+{% endblock %}

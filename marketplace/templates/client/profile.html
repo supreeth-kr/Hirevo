@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Client Profile - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-primary bg-opacity-10 text-primary small">Client Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'client_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'client_orders' %}" class="sidebar-nav-item"><i class="bi bi-receipt"></i> My Orders</a>
+        <a href="{% url 'messages_inbox' %}" class="sidebar-nav-item"><i class="bi bi-chat-dots"></i> Messages</a>
+        <a href="{% url 'client_payments' %}" class="sidebar-nav-item"><i class="bi bi-credit-card"></i> Payment History</a>
+        <a href="{% url 'client_profile' %}" class="sidebar-nav-item active"><i class="bi bi-person-gear"></i> Profile Settings</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <div class="hirevo-card p-4 p-md-5 max-w-700 mx-auto">
+        <h4 class="fw-bold mb-4 pb-2 border-bottom">Client Profile Settings</h4>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Full Name</label>
+            <input type="text" name="full_name" class="form-control" value="{{ user.full_name }}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Email Address</label>
+            <input type="email" class="form-control bg-light" value="{{ user.email }}" readonly>
+            <div class="form-text small">Email cannot be changed directly.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold small" for="{{ form.location.id_for_label }}">Location</label>
+            {{ form.location }}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold small" for="{{ form.bio.id_for_label }}">Bio / Company Overview</label>
+            {{ form.bio }}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold small" for="{{ form.profile_picture.id_for_label }}">Profile Picture</label>
+            {{ form.profile_picture }}
+            {% if profile.profile_picture %}
+              <div class="mt-2">
+                <img src="{{ profile.profile_picture.url }}" class="rounded-circle border" style="width: 60px; height: 60px; object-fit: cover;">
+              </div>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="btn btn-hirevo px-4">Save Profile Changes</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

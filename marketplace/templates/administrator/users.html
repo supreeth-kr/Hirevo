@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}User Management - Hirevo Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-danger bg-opacity-10 text-danger small">Admin Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'admin_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'admin_delayed_projects' %}" class="sidebar-nav-item"><i class="bi bi-exclamation-octagon text-danger"></i> Delayed Projects</a>
+        <a href="{% url 'admin_backup_assignments' %}" class="sidebar-nav-item"><i class="bi bi-shield-check text-info"></i> Backup Assignments</a>
+        <a href="{% url 'admin_penalties' %}" class="sidebar-nav-item"><i class="bi bi-percent text-warning"></i> Penalties (5%)</a>
+        <a href="{% url 'admin_orders' %}" class="sidebar-nav-item"><i class="bi bi-receipt"></i> Orders Monitor</a>
+        <a href="{% url 'admin_users' %}" class="sidebar-nav-item active"><i class="bi bi-people"></i> All Users</a>
+        <a href="{% url 'admin_freelancers' %}" class="sidebar-nav-item"><i class="bi bi-laptop"></i> Freelancers</a>
+        <a href="{% url 'admin_clients' %}" class="sidebar-nav-item"><i class="bi bi-briefcase"></i> Clients</a>
+        <a href="{% url 'admin_gigs' %}" class="sidebar-nav-item"><i class="bi bi-collection"></i> Marketplace Gigs</a>
+        <a href="{% url 'admin_categories' %}" class="sidebar-nav-item"><i class="bi bi-tags"></i> Categories</a>
+        <a href="{% url 'admin_payments' %}" class="sidebar-nav-item"><i class="bi bi-credit-card"></i> Payments</a>
+        <a href="{% url 'admin_reviews' %}" class="sidebar-nav-item"><i class="bi bi-star"></i> Reviews Moderation</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold mb-1">User Management</h3>
+          <p class="text-muted small mb-0">Search, filter by role, and manage active status of platform accounts.</p>
+        </div>
+      </div>
+
+      <!-- Filter / Search Form -->
+      <div class="hirevo-card p-3 mb-4">
+        <form method="get" class="row g-2 align-items-center">
+          <div class="col-md-5">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="text" name="q" class="form-control" placeholder="Search by name, username, or email..." value="{{ query }}">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <select name="role" class="form-select form-select-sm">
+              <option value="">All Roles</option>
+              <option value="client" {% if role_filter == 'client' %}selected{% endif %}>Clients</option>
+              <option value="freelancer" {% if role_filter == 'freelancer' %}selected{% endif %}>Freelancers</option>
+              <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Administrators</option>
+            </select>
+          </div>
+          <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-hirevo btn-sm flex-grow-1">Filter</button>
+            <a href="{% url 'admin_users' %}" class="btn btn-outline-secondary btn-sm">Reset</a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Users Table -->
+      <div class="hirevo-card p-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody class="small">
+              {% for u in page_obj %}
+                <tr>
+                  <td>
+                    <div class="fw-bold text-dark">{{ u.full_name|default:u.username }}</div>
+                    <div class="text-muted small">@{{ u.username }}</div>
+                  </td>
+                  <td>{{ u.email }}</td>
+                  <td>
+                    <span class="badge {% if u.role == 'freelancer' %}bg-success{% elif u.role == 'client' %}bg-primary{% else %}bg-danger{% endif %} text-capitalize">
+                      {{ u.role }}
+                    </span>
+                  </td>
+                  <td class="text-muted">{{ u.date_joined|date:"d M Y" }}</td>
+                  <td>
+                    <span class="badge {% if u.is_active %}bg-success bg-opacity-10 text-success{% else %}bg-danger bg-opacity-10 text-danger{% endif %}">
+                      {% if u.is_active %}Active{% else %}Deactivated{% endif %}
+                    </span>
+                  </td>
+                  <td>
+                    <a href="{% url 'admin_user_toggle' u.id %}" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}" title="Toggle Active">
+                      {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="6" class="text-center py-4 text-muted">No users found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+          <nav class="mt-4">
+            <ul class="pagination pagination-sm justify-content-center">
+              {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&role={{ role_filter }}&q={{ query }}">Previous</a></li>
+              {% endif %}
+              <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+              {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&role={{ role_filter }}&q={{ query }}">Next</a></li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

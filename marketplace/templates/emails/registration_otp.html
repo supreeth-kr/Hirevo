@@ -1,0 +1,29 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+  <div style="text-align: center; margin-bottom: 24px;">
+    <div style="display: inline-block; width: 56px; height: 56px; line-height: 56px; border-radius: 28px; background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 26px; margin-bottom: 12px;">
+      &#x1F510;
+    </div>
+    <h2 style="color: #ffffff; margin: 0 0 8px 0; font-size: 20px; font-weight: 700;">Verify Your Email Address</h2>
+    <p style="color: #94a3b8; margin: 0; font-size: 14px;">Welcome to Hirevo! Complete your account setup with the verification code below.</p>
+  </div>
+
+  <p>Hello <strong>{{ full_name }}</strong>,</p>
+  <p>Thank you for registering on <strong>Hirevo</strong>. To confirm your email address and activate your account, please enter the following 6-digit verification code:</p>
+
+  <div style="text-align: center; margin: 28px 0;">
+    <div style="display: inline-block; background: #1e293b; border: 2px dashed #10b981; border-radius: 12px; padding: 16px 36px; letter-spacing: 8px; font-size: 32px; font-weight: 800; color: #10b981; font-family: monospace;">
+      {{ otp_code }}
+    </div>
+    <p style="color: #f59e0b; font-size: 13px; margin-top: 10px; margin-bottom: 0;">
+      &#x23F1; This code is valid for <strong>{{ expiry_minutes }} minutes</strong> and can only be used once.
+    </p>
+  </div>
+
+  <div class="info-card">
+    <p style="margin: 0; font-size: 13px; color: #94a3b8;">
+      <strong style="color: #cbd5e1;">Security Notice:</strong> If you did not create an account on Hirevo, you can safely ignore this email. Do not share this code with anyone.
+    </p>
+  </div>
+{% endblock %}

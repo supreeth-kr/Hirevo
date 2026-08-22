@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Global Orders Monitor - Hirevo Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-danger bg-opacity-10 text-danger small">Admin Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'admin_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'admin_delayed_projects' %}" class="sidebar-nav-item"><i class="bi bi-exclamation-octagon text-danger"></i> Delayed Projects</a>
+        <a href="{% url 'admin_backup_assignments' %}" class="sidebar-nav-item"><i class="bi bi-shield-check text-info"></i> Backup Assignments</a>
+        <a href="{% url 'admin_penalties' %}" class="sidebar-nav-item"><i class="bi bi-percent text-warning"></i> Penalties (5%)</a>
+        <a href="{% url 'admin_orders' %}" class="sidebar-nav-item active"><i class="bi bi-receipt"></i> Orders Monitor</a>
+        <a href="{% url 'admin_users' %}" class="sidebar-nav-item"><i class="bi bi-people"></i> All Users</a>
+        <a href="{% url 'admin_freelancers' %}" class="sidebar-nav-item"><i class="bi bi-laptop"></i> Freelancers</a>
+        <a href="{% url 'admin_clients' %}" class="sidebar-nav-item"><i class="bi bi-briefcase"></i> Clients</a>
+        <a href="{% url 'admin_gigs' %}" class="sidebar-nav-item"><i class="bi bi-collection"></i> Marketplace Gigs</a>
+        <a href="{% url 'admin_categories' %}" class="sidebar-nav-item"><i class="bi bi-tags"></i> Categories</a>
+        <a href="{% url 'admin_payments' %}" class="sidebar-nav-item"><i class="bi bi-credit-card"></i> Payments</a>
+        <a href="{% url 'admin_reviews' %}" class="sidebar-nav-item"><i class="bi bi-star"></i> Reviews Moderation</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold mb-1">Global Orders Monitor</h3>
+          <p class="text-muted small mb-0">Oversee all customer orders, deadlines, delivery progress, and completion states.</p>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="{% url 'admin_orders' %}" class="btn btn-sm {% if not status_filter %}btn-dark{% else %}btn-outline-secondary{% endif %}">All</a>
+        <a href="{% url 'admin_orders' %}?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Pending</a>
+        <a href="{% url 'admin_orders' %}?status=accepted" class="btn btn-sm {% if status_filter == 'accepted' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Accepted</a>
+        <a href="{% url 'admin_orders' %}?status=in_progress" class="btn btn-sm {% if status_filter == 'in_progress' %}btn-dark{% else %}btn-outline-secondary{% endif %}">In Progress</a>
+        <a href="{% url 'admin_orders' %}?status=submitted" class="btn btn-sm {% if status_filter == 'submitted' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Submitted</a>
+        <a href="{% url 'admin_orders' %}?status=revision_requested" class="btn btn-sm {% if status_filter == 'revision_requested' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Revisions</a>
+        <a href="{% url 'admin_orders' %}?status=completed" class="btn btn-sm {% if status_filter == 'completed' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Completed</a>
+        <a href="{% url 'admin_orders' %}?status=delayed" class="btn btn-sm {% if status_filter == 'delayed' %}btn-danger text-white{% else %}btn-outline-danger{% endif %}">Delayed</a>
+        <a href="{% url 'admin_orders' %}?status=backup_assigned" class="btn btn-sm {% if status_filter == 'backup_assigned' %}btn-info text-white{% else %}btn-outline-info{% endif %}">Backup Assigned</a>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="hirevo-card p-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>Order ID</th>
+                <th>Client</th>
+                <th>Freelancer</th>
+                <th>Gig Title</th>
+                <th>Price</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody class="small">
+              {% for order in page_obj %}
+                <tr>
+                  <td class="fw-bold text-primary">{{ order.order_id }}</td>
+                  <td>{{ order.client.username }}</td>
+                  <td class="fw-semibold">{{ order.freelancer.username }}</td>
+                  <td class="text-truncate" style="max-width: 180px;">{{ order.gig.title }}</td>
+                  <td class="fw-bold text-success">₹{{ order.price }}</td>
+                  <td class="text-muted">{{ order.deadline|date:"d M Y, H:i"|default:"TBD" }}</td>
+                  <td>
+                    <span class="badge-status {{ order.status }}">{{ order.get_status_display }}</span>
+                  </td>
+                  <td>
+                    <a href="{% url 'admin_order_detail' order.id %}" class="btn btn-sm btn-outline-secondary">
+                      Inspect &rarr;
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="8" class="text-center py-5 text-muted">No orders found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+          <nav class="mt-4">
+            <ul class="pagination pagination-sm justify-content-center">
+              {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">Previous</a></li>
+              {% endif %}
+              <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+              {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">Next</a></li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'partials/base.html' %}
+{% block title %} - Home{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<section class="hero-section text-white py-5" style="background: linear-gradient(135deg, #e63946 0%, #9b1d23 100%);">
+  <div class="container py-4">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <h1 class="display-4 fw-bold mb-3">Find the perfect <em>freelance</em> services for your business</h1>
+        <form action="{% url 'gig_list' %}" method="get" class="d-flex gap-2">
+          <input type="text" name="search" class="form-control form-control-lg" placeholder='Try "logo design" or "web development"'/>
+          <button class="btn btn-dark btn-lg px-4"><i class="bi bi-search"></i></button>
+        </form>
+        <div class="mt-3 d-flex flex-wrap gap-2">
+          <span class="text-white-50 small">Popular:</span>
+          <a href="{% url 'gig_list' %}?category=design" class="badge bg-white text-dark text-decoration-none">Logo Design</a>
+          <a href="{% url 'gig_list' %}?category=wordpress" class="badge bg-white text-dark text-decoration-none">WordPress</a>
+          <a href="{% url 'gig_list' %}?category=video" class="badge bg-white text-dark text-decoration-none">Video Editing</a>
+          <a href="{% url 'gig_list' %}?category=seo" class="badge bg-white text-dark text-decoration-none">SEO</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trusted By -->
+<section class="py-4 border-bottom bg-light">
+  <div class="container">
+    <div class="d-flex align-items-center gap-4 flex-wrap justify-content-center">
+      <span class="text-muted small fw-semibold">Trusted by:</span>
+      <span class="text-muted fw-bold fs-5">Meta</span>
+      <span class="text-muted fw-bold fs-5">Google</span>
+      <span class="text-muted fw-bold fs-5">Netflix</span>
+      <span class="text-muted fw-bold fs-5">P&G</span>
+      <span class="text-muted fw-bold fs-5">PayPal</span>
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="fw-bold mb-4">Explore Categories</h2>
+    <div class="row g-3">
+      {% for slug, name in categories %}
+      <div class="col-6 col-md-3 col-lg-2">
+        <a href="{% url 'gig_list' %}?category={{ slug }}" class="text-decoration-none">
+          <div class="card h-100 text-center border-0 shadow-sm category-card p-3">
+            <i class="bi bi-grid fs-2 text-success mb-2"></i>
+            <p class="mb-0 fw-semibold small">{{ name }}</p>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Featured Gigs -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <h2 class="fw-bold mb-4">Popular Services</h2>
+    <div class="row g-4">
+      {% for gig in featured_gigs %}
+      <div class="col-md-6 col-lg-3">
+        <a href="{% url 'gig_detail' gig.pk %}" class="text-decoration-none text-dark">
+          <div class="card h-100 shadow-sm gig-card">
+            {% if gig.cover %}
+            <img src="{{ gig.cover }}" class="card-img-top" style="height:180px;object-fit:cover" alt="{{ gig.title }}">
+            {% endif %}
+            <div class="card-body">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                {% if gig.seller.image %}<img src="{{ gig.seller.image }}" class="rounded-circle" width="28" height="28" style="object-fit:cover">{% endif %}
+                <small class="text-muted">{{ gig.seller.username }}</small>
+              </div>
+              <p class="card-text small fw-semibold">{{ gig.title }}</p>
+              <div class="d-flex align-items-center gap-1 mb-1">
+                <i class="bi bi-star-fill text-warning small"></i>
+                <small class="fw-bold">{{ gig.avg_rating }}</small>
+                <small class="text-muted">({{ gig.star_number }})</small>
+              </div>
+              <p class="mb-0 fw-bold text-success">From ${{ gig.price }}</p>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Recommended (if logged in) -->
+{% if recommended %}
+<section class="py-5">
+  <div class="container">
+    <h2 class="fw-bold mb-4">Recommended For You</h2>
+    <div class="row g-4">
+      {% for gig in recommended %}
+      <div class="col-md-6 col-lg-3">
+        <a href="{% url 'gig_detail' gig.pk %}" class="text-decoration-none text-dark">
+          <div class="card h-100 shadow-sm gig-card">
+            {% if gig.cover %}<img src="{{ gig.cover }}" class="card-img-top" style="height:180px;object-fit:cover">{% endif %}
+            <div class="card-body">
+              <p class="card-text small fw-semibold">{{ gig.title }}</p>
+              <p class="mb-0 fw-bold text-success">From ${{ gig.price }}</p>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Hirevo Business -->
+<section class="py-5 bg-dark text-white">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <p class="text-success fw-bold mb-1">hirevo business</p>
+        <h2 class="fw-bold">A business solution designed for <span class="text-success">teams</span></h2>
+        <p class="text-muted">Upgrade to a curated experience packed with tools and benefits, dedicated to businesses</p>
+        <ul class="list-unstyled">
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Connect to freelancers with proven business experience</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Get matched with the perfect talent by a customer success manager</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Manage teamwork and boost productivity with one powerful workspace</li>
+        </ul>
+        <a href="{% url 'gig_list' %}" class="btn btn-success btn-lg">Explore Hirevo Business</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

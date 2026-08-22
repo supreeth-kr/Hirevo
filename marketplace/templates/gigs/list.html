@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Explore Gigs - Hirevo Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Search & Breadcrumb Header -->
+  <div class="row align-items-center mb-4">
+    <div class="col-md-6">
+      <h2 class="h3 fw-bold mb-1">Explore Marketplace Gigs</h2>
+      <p class="text-muted small mb-0">Found {{ total_count }} active freelance service{{ total_count|pluralize }}</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Filter Sidebar -->
+    <div class="col-lg-3">
+      <div class="hirevo-card p-3 sticky-top" style="top: 80px; z-index: 10;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-funnel me-1"></i> Filters</h6>
+          <a href="{% url 'gig_list' %}" class="small text-decoration-none text-muted">Reset</a>
+        </div>
+
+        <form method="get" action="{% url 'gig_list' %}">
+          <!-- Keyword -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Keywords</label>
+            <input type="text" name="q" class="form-control form-control-sm" placeholder="Search keywords..." value="{{ query }}">
+          </div>
+
+          <!-- Category -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Category</label>
+            <select name="category" class="form-select form-select-sm">
+              <option value="">All Categories</option>
+              {% for cat in categories %}
+                <option value="{{ cat.slug }}" {% if category_slug == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Price Range -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Budget Range (₹)</label>
+            <div class="row g-1">
+              <div class="col-6">
+                <input type="number" name="min_price" class="form-control form-control-sm" placeholder="Min" value="{{ min_price }}">
+              </div>
+              <div class="col-6">
+                <input type="number" name="max_price" class="form-control form-control-sm" placeholder="Max" value="{{ max_price }}">
+              </div>
+            </div>
+          </div>
+
+          <!-- Delivery Time -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Max Delivery Days</label>
+            <select name="delivery_days" class="form-select form-select-sm">
+              <option value="">Any Delivery Time</option>
+              <option value="1" {% if delivery_days == '1' %}selected{% endif %}>Up to 24 Hours</option>
+              <option value="3" {% if delivery_days == '3' %}selected{% endif %}>Up to 3 Days</option>
+              <option value="7" {% if delivery_days == '7' %}selected{% endif %}>Up to 7 Days</option>
+            </select>
+          </div>
+
+          <!-- Sorting -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Sort By</label>
+            <select name="sort" class="form-select form-select-sm">
+              <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+              <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+              <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+              <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-hirevo btn-sm w-100">Apply Filters</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Gigs Grid -->
+    <div class="col-lg-9">
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        {% for gig in page_obj %}
+          <div class="col">
+            <div class="hirevo-card hirevo-card-hover h-100 d-flex flex-column">
+              <div class="gig-card-img-wrapper">
+                {% if gig.cover_image %}
+                  <img src="{{ gig.cover_image.url }}" alt="{{ gig.title }}" class="gig-card-img">
+                {% else %}
+                  <div class="w-100 h-100 bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center text-muted">
+                    <i class="bi bi-image fs-2"></i>
+                  </div>
+                {% endif %}
+                {% if gig.category %}
+                  <span class="gig-badge-category">{{ gig.category.name }}</span>
+                {% endif %}
+              </div>
+              <div class="p-3 d-flex flex-column flex-grow-1">
+                <!-- Freelancer Info -->
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 28px; height: 28px; font-size: 0.75rem;">
+                    {{ gig.freelancer.username|slice:":1"|upper }}
+                  </div>
+                  <a href="{% url 'freelancer_public_profile' gig.freelancer.id %}" class="text-dark fw-semibold small text-decoration-none text-truncate">
+                    {{ gig.freelancer.full_name|default:gig.freelancer.username }}
+                  </a>
+                </div>
+
+                <h6 class="fw-bold mb-2 flex-grow-1">
+                  <a href="{% url 'gig_detail' gig.id %}" class="text-dark text-decoration-none line-clamp-2">
+                    {{ gig.title }}
+                  </a>
+                </h6>
+
+                <!-- Delivery & Rating -->
+                <div class="d-flex justify-content-between align-items-center small text-muted mb-3">
+                  <div class="d-flex align-items-center gap-1">
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <span class="fw-bold text-dark">{{ gig.avg_rating|default:"5.0" }}</span>
+                    <span>({{ gig.total_reviews }})</span>
+                  </div>
+                  <div>
+                    <i class="bi bi-clock me-1"></i>{{ gig.min_delivery }}d delivery
+                  </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
+                  <div class="text-muted small">
+                    STARTING AT <span class="fw-bold fs-6 text-dark">₹{{ gig.starting_price }}</span>
+                  </div>
+                  <a href="{% url 'gig_detail' gig.id %}" class="btn btn-sm btn-outline-success">View</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="col-12 text-center py-5">
+            <div class="text-muted mb-3"><i class="bi bi-search fs-1"></i></div>
+            <h5>No gigs found matching your criteria</h5>
+            <p class="text-muted small">Try broadening your search keywords or adjusting your price filters.</p>
+            <a href="{% url 'gig_list' %}" class="btn btn-hirevo btn-sm">Clear All Filters</a>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+        <nav class="mt-4" aria-label="Page navigation">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&category={{ category_slug }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}">Previous</a></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&category={{ category_slug }}&min_price={{ min_price }}&max_price={{ max_price }}&sort={{ sort_by }}">Next</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

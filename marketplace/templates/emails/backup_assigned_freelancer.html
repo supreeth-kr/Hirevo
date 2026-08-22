@@ -1,0 +1,47 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+  <div style="text-align: center; margin-bottom: 24px;">
+    <div style="display: inline-block; padding: 6px 16px; border-radius: 20px; background: rgba(6, 182, 212, 0.15); color: #22d3ee; font-weight: 700; font-size: 12px; text-transform: uppercase; margin-bottom: 12px; border: 1px solid rgba(6, 182, 212, 0.4);">
+      Priority Backup Assignment
+    </div>
+    <h2 style="color: #ffffff; margin: 0 0 8px 0; font-size: 20px; font-weight: 700;">You've Been Selected as Backup Specialist</h2>
+    <p style="color: #94a3b8; margin: 0; font-size: 14px;">Platform Administrator <strong>{{ admin_user.username }}</strong> has matched your skillset to take over this project.</p>
+  </div>
+
+  <p>Hello <strong>{{ backup_freelancer.full_name|default:backup_freelancer.username }}</strong>,</p>
+  <p>Due to a delivery delay by the primary freelancer, you have been selected by platform management to assume project continuity for Order <strong>{{ order.order_id }}</strong>.</p>
+
+  <div class="info-card" style="border-left: 4px solid #06b6d4;">
+    <table class="info-table">
+      <tr>
+        <td class="info-label">Order ID</td>
+        <td class="info-value"><span style="color: #10b981; font-family: monospace;">{{ order.order_id }}</span></td>
+      </tr>
+      <tr>
+        <td class="info-label">Gig / Service</td>
+        <td class="info-value">{{ order.gig.title }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Order Value</td>
+        <td class="info-value">&#8377;{{ order.price }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Client Name</td>
+        <td class="info-value">{{ order.client.full_name|default:order.client.username }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Assignment Reason</td>
+        <td class="info-value" style="color: #cbd5e1; font-weight: normal;">{{ reason }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <p style="font-size: 14px; color: #94a3b8;">
+    Please log in to your dashboard to review the complete order brief, communication history, and accept or decline the backup assignment.
+  </p>
+
+  <div style="text-align: center; margin: 24px 0;">
+    <a href="{{ project_url }}" class="btn-primary">Review & Accept Assignment</a>
+  </div>
+{% endblock %}

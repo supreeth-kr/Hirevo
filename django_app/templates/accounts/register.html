@@ -1,0 +1,141 @@
+{% extends 'partials/base.html' %}
+{% block title %} - Register{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:560px">
+
+  <!-- Role Toggle -->
+  <ul class="nav nav-pills nav-fill mb-4" id="registerTabs">
+    <li class="nav-item">
+      <button class="nav-link {% if role != 'freelancer' %}active{% endif %} fw-bold" onclick="switchRole('client')">
+        <i class="bi bi-person me-1"></i> Join as Client
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link {% if role == 'freelancer' %}active{% endif %} fw-bold" onclick="switchRole('freelancer')">
+        <i class="bi bi-briefcase me-1"></i> Join as Freelancer
+      </button>
+    </li>
+  </ul>
+
+  <!-- Client Register -->
+  <div id="client-panel" class="{% if role == 'freelancer' %}d-none{% endif %}">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <span class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:56px;height:56px;background:rgba(230,57,70,0.1)">
+            <i class="bi bi-person-fill fs-3" style="color:#e63946"></i>
+          </span>
+          <h4 class="fw-bold mb-0">Create Client Account</h4>
+          <p class="text-muted small">Hire top freelancers for your projects</p>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="role" value="client">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors }}</div>{% endif %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors }}</div>{% endif %}
+          </div>
+          <div class="row">
+            <div class="col mb-3">
+              <label class="form-label fw-semibold">Phone</label>
+              {{ form.phone }}
+            </div>
+            <div class="col mb-3">
+              <label class="form-label fw-semibold">Country</label>
+              {{ form.country }}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Password</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}<div class="text-danger small">{{ form.password1.errors }}</div>{% endif %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Confirm Password</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}<div class="text-danger small">{{ form.password2.errors }}</div>{% endif %}
+          </div>
+          <button class="btn btn-success w-100 py-2 fw-bold">Create Client Account</button>
+        </form>
+        <p class="text-center mt-3 text-muted small">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Freelancer Register -->
+  <div id="freelancer-panel" class="{% if role != 'freelancer' %}d-none{% endif %}">
+    <div class="card shadow-sm border-0" style="border-top: 3px solid #e63946 !important;">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <span class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:56px;height:56px;background:#e63946">
+            <i class="bi bi-briefcase-fill fs-3 text-white"></i>
+          </span>
+          <h4 class="fw-bold mb-0">Become a Freelancer</h4>
+          <p class="text-muted small">Offer your skills and earn money</p>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="role" value="freelancer">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors }}</div>{% endif %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors }}</div>{% endif %}
+          </div>
+          <div class="row">
+            <div class="col mb-3">
+              <label class="form-label fw-semibold">Phone</label>
+              {{ form.phone }}
+            </div>
+            <div class="col mb-3">
+              <label class="form-label fw-semibold">Country</label>
+              {{ form.country }}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Bio / Description</label>
+            {{ form.description }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Profile Image URL</label>
+            {{ form.image }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Password</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}<div class="text-danger small">{{ form.password1.errors }}</div>{% endif %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Confirm Password</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}<div class="text-danger small">{{ form.password2.errors }}</div>{% endif %}
+          </div>
+          <button class="btn btn-success w-100 py-2 fw-bold">Create Freelancer Account</button>
+        </form>
+        <p class="text-center mt-3 text-muted small">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function switchRole(role) {
+  document.getElementById('client-panel').classList.toggle('d-none', role !== 'client');
+  document.getElementById('freelancer-panel').classList.toggle('d-none', role !== 'freelancer');
+  document.querySelectorAll('#registerTabs .nav-link')[0].classList.toggle('active', role === 'client');
+  document.querySelectorAll('#registerTabs .nav-link')[1].classList.toggle('active', role === 'freelancer');
+}
+</script>
+{% endblock %}

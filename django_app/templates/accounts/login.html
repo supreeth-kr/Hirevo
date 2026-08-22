@@ -1,0 +1,93 @@
+{% extends 'partials/base.html' %}
+{% block title %} - Sign In{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:500px">
+
+  <!-- Toggle Tabs -->
+  <ul class="nav nav-pills nav-fill mb-4" id="loginTabs">
+    <li class="nav-item">
+      <button class="nav-link {% if login_type != 'freelancer' %}active{% endif %} fw-bold" id="client-tab" onclick="switchTab('client')">
+        <i class="bi bi-person me-1"></i> Client Login
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link {% if login_type == 'freelancer' %}active{% endif %} fw-bold" id="freelancer-tab" onclick="switchTab('freelancer')">
+        <i class="bi bi-briefcase me-1"></i> Freelancer Login
+      </button>
+    </li>
+  </ul>
+
+  <!-- Client Login -->
+  <div id="client-panel" class="{% if login_type == 'freelancer' %}d-none{% endif %}">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <span class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:56px;height:56px">
+            <i class="bi bi-person-fill fs-3"></i>
+          </span>
+          <h4 class="fw-bold mb-0">Welcome Back</h4>
+          <p class="text-muted small">Sign in to hire top freelancers</p>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="login_type" value="client">
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+          </div>
+          {% endfor %}
+          {% if error and login_type != 'freelancer' %}
+          <div class="alert alert-danger py-2 small">{{ error }}</div>
+          {% endif %}
+          <button class="btn btn-success w-100 py-2 fw-bold">Sign In as Client</button>
+        </form>
+        <p class="text-center mt-3 text-muted small">Don't have an account? <a href="{% url 'register' %}">Join Hirevo</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Freelancer Login -->
+  <div id="freelancer-panel" class="{% if login_type != 'freelancer' %}d-none{% endif %}">
+    <div class="card shadow-sm border-0 border-top border-success border-3">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <span class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:56px;height:56px">
+            <i class="bi bi-briefcase-fill fs-3"></i>
+          </span>
+          <h4 class="fw-bold mb-0">Freelancer Portal</h4>
+          <p class="text-muted small">Sign in to manage your gigs & orders</p>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="login_type" value="freelancer">
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+          </div>
+          {% endfor %}
+          {% if error and login_type == 'freelancer' %}
+          <div class="alert alert-danger py-2 small">{{ error }}</div>
+          {% endif %}
+          <button class="btn btn-success w-100 py-2 fw-bold">Sign In as Freelancer</button>
+        </form>
+        <p class="text-center mt-3 text-muted small">Want to sell? <a href="{% url 'register' %}">Become a Seller</a></p>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function switchTab(type) {
+  document.getElementById('client-panel').classList.toggle('d-none', type !== 'client');
+  document.getElementById('freelancer-panel').classList.toggle('d-none', type !== 'freelancer');
+  document.getElementById('client-tab').classList.toggle('active', type === 'client');
+  document.getElementById('freelancer-tab').classList.toggle('active', type === 'freelancer');
+}
+</script>
+{% endblock %}

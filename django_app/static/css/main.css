@@ -1,0 +1,58 @@
+/* Global */
+body { font-family: 'Segoe UI', sans-serif; }
+
+/* Gig Cards */
+.gig-card { transition: transform 0.2s, box-shadow 0.2s; border-radius: 8px; overflow: hidden; }
+.gig-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important; }
+
+/* Category Cards */
+.category-card { transition: all 0.2s; cursor: pointer; border-radius: 8px; }
+.category-card:hover { background-color: #e63946 !important; color: white !important; }
+.category-card:hover p, .category-card:hover i { color: white !important; }
+
+/* Hero */
+.hero-section { min-height: 380px; }
+
+/* Forms */
+input, select, textarea { border-radius: 6px !important; }
+input:focus, select:focus, textarea:focus { border-color: #e63946 !important; box-shadow: 0 0 0 0.2rem rgba(230,57,70,0.25) !important; }
+
+/* Buttons */
+.btn-success { background-color: #e63946 !important; border-color: #e63946 !important; color: #fff !important; }
+.btn-success:hover { background-color: #c1121f !important; border-color: #c1121f !important; }
+.btn-outline-secondary:hover { background-color: #e63946 !important; border-color: #e63946 !important; color: #fff !important; }
+
+/* Navbar */
+.navbar-brand { letter-spacing: -1px; }
+.navbar { background-color: #1a1a2e !important; }
+
+/* Text success → red */
+.text-success { color: #e63946 !important; }
+
+/* Badge success → red */
+.badge.bg-success { background-color: #e63946 !important; }
+
+/* Border success → red */
+.border-success { border-color: #e63946 !important; }
+
+/* Nav pills active */
+.nav-pills .nav-link.active { background-color: #e63946 !important; }
+.nav-pills .nav-link { color: #e63946; }
+
+/* Chat */
+#chat-box { scroll-behavior: smooth; }
+
+/* Chat bubble */
+.bg-success { background-color: #e63946 !important; }
+
+/* Hero gradient */
+.hero-gradient { background: linear-gradient(135deg, #e63946 0%, #9b1d23 100%) !important; }
+
+/* Footer brand */
+footer h5, footer .text-success { color: #e63946 !important; }
+
+/* Table dark header */
+.table-dark { background-color: #1a1a2e !important; }
+
+/* Spinner / loader */
+.text-warning { color: #e63946 !important; }

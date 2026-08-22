@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Category Management - Hirevo Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-danger bg-opacity-10 text-danger small">Admin Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'admin_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'admin_delayed_projects' %}" class="sidebar-nav-item"><i class="bi bi-exclamation-octagon text-danger"></i> Delayed Projects</a>
+        <a href="{% url 'admin_backup_assignments' %}" class="sidebar-nav-item"><i class="bi bi-shield-check text-info"></i> Backup Assignments</a>
+        <a href="{% url 'admin_penalties' %}" class="sidebar-nav-item"><i class="bi bi-percent text-warning"></i> Penalties (5%)</a>
+        <a href="{% url 'admin_orders' %}" class="sidebar-nav-item"><i class="bi bi-receipt"></i> Orders Monitor</a>
+        <a href="{% url 'admin_users' %}" class="sidebar-nav-item"><i class="bi bi-people"></i> All Users</a>
+        <a href="{% url 'admin_freelancers' %}" class="sidebar-nav-item"><i class="bi bi-laptop"></i> Freelancers</a>
+        <a href="{% url 'admin_clients' %}" class="sidebar-nav-item"><i class="bi bi-briefcase"></i> Clients</a>
+        <a href="{% url 'admin_gigs' %}" class="sidebar-nav-item"><i class="bi bi-collection"></i> Marketplace Gigs</a>
+        <a href="{% url 'admin_categories' %}" class="sidebar-nav-item active"><i class="bi bi-tags"></i> Categories</a>
+        <a href="{% url 'admin_payments' %}" class="sidebar-nav-item"><i class="bi bi-credit-card"></i> Payments</a>
+        <a href="{% url 'admin_reviews' %}" class="sidebar-nav-item"><i class="bi bi-star"></i> Reviews Moderation</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold mb-1">Marketplace Categories</h3>
+          <p class="text-muted small mb-0">Manage service taxonomy and domain groupings.</p>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="hirevo-card p-4">
+            <h5 class="fw-bold mb-3">Add New Category</h5>
+            <form method="post">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Category Name *</label>
+                {{ form.name }}
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">URL Slug *</label>
+                {{ form.slug }}
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Bootstrap Icon Class</label>
+                {{ form.icon }}
+                <div class="form-text small">e.g. bi-code-slash, bi-palette, bi-cpu</div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Description</label>
+                {{ form.description }}
+              </div>
+              <div class="mb-4 form-check">
+                {{ form.is_active }}
+                <label class="form-check-label small" for="{{ form.is_active.id_for_label }}">Active in Marketplace</label>
+              </div>
+              <button type="submit" class="btn btn-hirevo btn-sm w-100">Save Category</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <div class="hirevo-card p-4">
+            <h5 class="fw-bold mb-3">Existing Categories ({{ categories.count }})</h5>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                  <tr>
+                    <th>Category</th>
+                    <th>Slug</th>
+                    <th>Icon</th>
+                    <th>Active Gigs</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody class="small">
+                  {% for c in categories %}
+                    <tr>
+                      <td>
+                        <div class="fw-bold text-dark"><i class="bi {{ c.icon }} me-1 text-success"></i> {{ c.name }}</div>
+                      </td>
+                      <td><code>{{ c.slug }}</code></td>
+                      <td><i class="bi {{ c.icon }} fs-5"></i></td>
+                      <td><strong>{{ c.gigs_count }}</strong></td>
+                      <td>
+                        <span class="badge {% if c.is_active %}bg-success bg-opacity-10 text-success{% else %}bg-secondary bg-opacity-10 text-secondary{% endif %}">
+                          {% if c.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr><td colspan="5" class="text-center py-4 text-muted">No categories created.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

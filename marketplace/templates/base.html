@@ -1,0 +1,345 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Hirevo Freelance Services Marketplace{% endblock %}</title>
+  
+  <!-- Bootstrap 5 CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Custom Hirevo CSS -->
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+  {% block extra_css %}{% endblock %}
+  <style>
+    /* Splash Screen Animation */
+    #hirevo-splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #f8f9fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+    }
+    #hirevo-splash.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .splash-text {
+      font-size: 4rem;
+      font-weight: 800;
+      color: #198754;
+      display: flex;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+    .splash-text .letter {
+      transform: translateY(100%);
+      opacity: 0;
+      animation: slideUpFade 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+    .splash-text .letter:nth-child(1) { animation-delay: 0.1s; }
+    .splash-text .letter:nth-child(2) { animation-delay: 0.15s; }
+    .splash-text .letter:nth-child(3) { animation-delay: 0.2s; }
+    .splash-text .letter:nth-child(4) { animation-delay: 0.25s; }
+    .splash-text .letter:nth-child(5) { animation-delay: 0.3s; }
+    .splash-text .letter:nth-child(6) { animation-delay: 0.35s; }
+    
+    @keyframes slideUpFade {
+      0% { transform: translateY(100%); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Splash Screen -->
+  <div id="hirevo-splash">
+    <div class="splash-text">
+      <span class="letter">H</span>
+      <span class="letter">i</span>
+      <span class="letter">r</span>
+      <span class="letter">e</span>
+      <span class="letter">v</span>
+      <span class="letter">o</span>
+    </div>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <nav class="hirevo-navbar navbar navbar-expand-lg">
+    <div class="container">
+      <a class="hirevo-brand" href="{% url 'home' %}">
+        <i class="bi bi-layers-half text-success"></i>
+        <span>Hirevo</span>
+        <span class="brand-badge">AI Smart</span>
+      </a>
+
+      <!-- Search Input on Navbar -->
+      <form class="d-none d-md-flex mx-4 flex-grow-1" style="max-width: 420px;" action="{% url 'gig_list' %}" method="get">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" name="q" class="form-control bg-light border-start-0 ps-0" placeholder="Find services (e.g. Django, UI/UX, AI)..." value="{{ request.GET.q }}">
+          <button class="btn btn-hirevo" type="submit">Search</button>
+        </div>
+      </form>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+          <li class="nav-item">
+            <a class="nav-link fw-semibold" href="{% url 'gig_list' %}"><i class="bi bi-grid-fill me-1"></i> Explore Gigs</a>
+          </li>
+
+          {% if user.is_authenticated %}
+            <!-- Notifications Dropdown -->
+            <li class="nav-item dropdown">
+              <a class="nav-link position-relative px-2" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="bi bi-bell-fill fs-5"></i>
+                {% if unread_notifications_count > 0 %}
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ unread_notifications_count }}
+                  </span>
+                {% endif %}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm p-2" style="width: 320px;">
+                <div class="d-flex justify-content-between align-items-center px-2 py-1 border-bottom">
+                  <span class="fw-bold small">Notifications</span>
+                  <a href="{% url 'notifications_list' %}" class="text-decoration-none small text-success">View All</a>
+                </div>
+                {% for n in recent_notifications %}
+                  <li>
+                    <a class="dropdown-item py-2 px-2 rounded small {% if not n.is_read %}bg-light fw-bold{% endif %}" href="{% url 'notification_mark_read' n.id %}">
+                      <div class="text-truncate">{{ n.title }}</div>
+                      <div class="text-muted small text-truncate">{{ n.message }}</div>
+                    </a>
+                  </li>
+                {% empty %}
+                  <li class="text-muted text-center py-3 small">No notifications yet.</li>
+                {% endfor %}
+              </ul>
+            </li>
+
+            <!-- Messages Link -->
+            <li class="nav-item">
+              <a class="nav-link px-2" href="{% url 'messages_inbox' %}" title="Messages">
+                <i class="bi bi-chat-dots-fill fs-5"></i>
+              </a>
+            </li>
+
+            <!-- Role-Specific Portal Button -->
+            {% if user.is_admin_user %}
+              <li class="nav-item">
+                <a class="btn btn-sm btn-outline-danger fw-bold" href="{% url 'admin_dashboard' %}">
+                  <i class="bi bi-shield-lock-fill me-1"></i> Admin Portal
+                </a>
+              </li>
+            {% elif user.is_client %}
+              <li class="nav-item">
+                <a class="btn btn-sm btn-outline-primary fw-bold" href="{% url 'client_dashboard' %}">
+                  <i class="bi bi-briefcase-fill me-1"></i> Client Portal
+                </a>
+              </li>
+            {% elif user.is_freelancer %}
+              <li class="nav-item">
+                <a class="btn btn-sm btn-outline-success fw-bold" href="{% url 'freelancer_dashboard' %}">
+                  <i class="bi bi-laptop me-1"></i> Freelancer Portal
+                </a>
+              </li>
+            {% endif %}
+
+            <!-- User Profile Dropdown -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="bi bi-person-circle fs-5 text-secondary"></i>
+                <span>{{ user.username }}</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                {% if user.is_client %}
+                  <li><a class="dropdown-item" href="{% url 'client_dashboard' %}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+                  <li><a class="dropdown-item" href="{% url 'client_orders' %}"><i class="bi bi-receipt me-2"></i> My Orders</a></li>
+                  <li><a class="dropdown-item" href="{% url 'client_profile' %}"><i class="bi bi-person me-2"></i> Profile Settings</a></li>
+                {% elif user.is_freelancer %}
+                  <li><a class="dropdown-item" href="{% url 'freelancer_dashboard' %}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+                  <li><a class="dropdown-item" href="{% url 'freelancer_gigs' %}"><i class="bi bi-collection me-2"></i> My Gigs</a></li>
+                  <li><a class="dropdown-item" href="{% url 'freelancer_orders' %}"><i class="bi bi-list-task me-2"></i> Orders</a></li>
+                  <li><a class="dropdown-item" href="{% url 'freelancer_profile' %}"><i class="bi bi-person me-2"></i> Profile Settings</a></li>
+                  <li><a class="dropdown-item" href="{% url 'freelancer_verification' %}"><i class="bi bi-patch-check me-2"></i> Identity Verification</a></li>
+                {% elif user.is_admin_user %}
+                  <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2 me-2"></i> Admin Dashboard</a></li>
+                {% endif %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
+              </ul>
+            </li>
+
+          {% else %}
+            <!-- Sign In Dropdown with Role Options & Admin Portal -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle fw-semibold text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm p-2" style="min-width: 220px;">
+                <li class="dropdown-header small text-uppercase text-muted fw-bold">Select Portal</li>
+                <li>
+                  <a class="dropdown-item py-2 rounded d-flex align-items-center gap-2" href="{% url 'login' %}?role=client">
+                    <i class="bi bi-briefcase-fill text-primary fs-5"></i>
+                    <div>
+                      <div class="fw-semibold small">Client Login</div>
+                      <div class="text-muted" style="font-size: 0.75rem;">Hire talent & place orders</div>
+                    </div>
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item py-2 rounded d-flex align-items-center gap-2" href="{% url 'login' %}?role=freelancer">
+                    <i class="bi bi-laptop text-success fs-5"></i>
+                    <div>
+                      <div class="fw-semibold small">Freelancer Login</div>
+                      <div class="text-muted" style="font-size: 0.75rem;">Deliver work & manage gigs</div>
+                    </div>
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider my-1"></li>
+                <li>
+                  <a class="dropdown-item py-2 rounded d-flex align-items-center gap-2 text-danger" href="{% url 'admin_login' %}">
+                    <i class="bi bi-shield-lock-fill text-danger fs-5"></i>
+                    <div>
+                      <div class="fw-semibold small">Admin Portal</div>
+                      <div class="text-muted" style="font-size: 0.75rem;">Platform operations & metrics</div>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-hirevo btn-sm" href="{% url 'register' %}">Join Hirevo</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Category Navigation Sub-bar -->
+  <div class="nav-category-bar">
+    <div class="container d-flex gap-2">
+      <a href="{% url 'gig_list' %}" class="cat-link {% if not category_slug %}active{% endif %}">
+        <i class="bi bi-grid"></i> All Categories
+      </a>
+      {% for cat in nav_categories %}
+        <a href="{% url 'category_detail' cat.slug %}" class="cat-link {% if category_slug == cat.slug %}active{% endif %}">
+          <i class="bi {{ cat.icon }}"></i> {{ cat.name }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Django Messages Alert Container -->
+  {% if messages %}
+    <div class="container mt-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+          <div class="d-flex align-items-center gap-2">
+            {% if message.tags == 'success' %}
+              <i class="bi bi-check-circle-fill text-success fs-5"></i>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+              <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+            {% elif message.tags == 'warning' %}
+              <i class="bi bi-exclamation-circle-fill text-warning fs-5"></i>
+            {% else %}
+              <i class="bi bi-info-circle-fill text-info fs-5"></i>
+            {% endif %}
+            <div>{{ message }}</div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Main Content Block -->
+  <main class="flex-grow-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="hirevo-footer">
+    <div class="container">
+      <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+          <div class="hirevo-brand mb-3 text-white">
+            <i class="bi bi-layers-half text-success"></i>
+            <span>Hirevo</span>
+            <span class="brand-badge">Marketplace</span>
+          </div>
+          <p class="small text-secondary mb-3">
+            Hirevo is the next-generation freelance services marketplace powered by explainable AI talent matching and intelligent project continuity management.
+          </p>
+          <div class="d-flex gap-3 text-secondary">
+            <i class="bi bi-shield-check text-success"></i> Verified Freelancers
+            <i class="bi bi-clock-history text-info"></i> Zero Delay Guarantee
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="text-white mb-3 fw-bold">Categories</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="{% url 'category_detail' 'programming-tech' %}">Programming & Tech</a></li>
+            <li><a href="{% url 'category_detail' 'graphics-design' %}">Graphics & Design</a></li>
+            <li><a href="{% url 'category_detail' 'ai-services' %}">AI Services</a></li>
+            <li><a href="{% url 'category_detail' 'web-development' %}">Web Development</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="text-white mb-3 fw-bold">Marketplace Portals</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="{% url 'login' %}?role=client"><i class="bi bi-briefcase me-1 text-primary"></i> Client Login</a></li>
+            <li><a href="{% url 'login' %}?role=freelancer"><i class="bi bi-laptop me-1 text-success"></i> Freelancer Login</a></li>
+            <li><a href="{% url 'admin_login' %}"><i class="bi bi-shield-lock me-1 text-danger"></i> Admin Portal</a></li>
+            <li><a href="{% url 'register' %}">Join Hirevo</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-white mb-3 fw-bold">Project Management Features</h6>
+          <p class="small text-secondary mb-2">
+            Hirevo automatically detects overdue orders, calculates fair freelancer delay penalties, and assigns backup qualified talent to guarantee project completion.
+          </p>
+        </div>
+      </div>
+      <div class="border-top border-secondary pt-3 text-center small text-secondary">
+        &copy; 2026 Hirevo Inc. All rights reserved. Built for high-performance freelance collaboration.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_js %}{% endblock %}
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const splash = document.getElementById('hirevo-splash');
+      if (splash) {
+        // Show splash once per session
+        if (!sessionStorage.getItem('hirevoSplashShown')) {
+          setTimeout(() => {
+            splash.classList.add('hidden');
+            sessionStorage.setItem('hirevoSplashShown', 'true');
+            // Remove from DOM after fade out to avoid blocking clicks
+            setTimeout(() => splash.remove(), 600);
+          }, 1500); // Display for 1.5s
+        } else {
+          splash.remove(); // Hide immediately if already shown
+        }
+      }
+    });
+  </script>
+</body>
+</html>

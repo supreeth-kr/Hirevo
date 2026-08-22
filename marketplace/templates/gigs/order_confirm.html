@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Confirm Order - {{ gig.title }} - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="hirevo-card p-4 p-md-5">
+        <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
+          <div>
+            <h3 class="fw-bold mb-1">Confirm Your Order</h3>
+            <p class="text-muted small mb-0">Review package details and submit project requirements</p>
+          </div>
+          <span class="badge bg-success bg-opacity-10 text-success fs-6 px-3 py-2">
+            Tier: {{ package.name }}
+          </span>
+        </div>
+
+        <!-- Gig & Package Overview -->
+        <div class="p-3 bg-light rounded mb-4 d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="fw-bold text-dark mb-1">{{ gig.title }}</h6>
+            <div class="small text-muted">
+              Seller: <span class="fw-semibold text-dark">{{ gig.freelancer.full_name|default:gig.freelancer.username }}</span> &bull; 
+              Delivery: <span class="fw-semibold text-dark">{{ package.delivery_days }} Days</span> &bull;
+              Revisions: <span class="fw-semibold text-dark">{% if package.revisions == -1 %}Unlimited{% else %}{{ package.revisions }}{% endif %}</span>
+            </div>
+          </div>
+          <div class="text-end">
+            <div class="fs-4 fw-extrabold text-success">₹{{ package.price }}</div>
+            <div class="small text-muted">Fixed Price</div>
+          </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="mb-4">
+            <label class="form-label fw-bold small text-uppercase text-muted">
+              1. Project Requirements & Instructions <span class="text-danger">*</span>
+            </label>
+            <textarea name="requirements" class="form-control" rows="5" placeholder="Detail your project goals, exact specifications, preferred tech stack, brand guidelines, or any required assets..." required></textarea>
+            <div class="form-text small">Provide as much detail as possible so the freelancer can begin immediately.</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold small text-uppercase text-muted">
+              2. Attach Project Files (Optional)
+            </label>
+            <input type="file" name="attachment" class="form-control">
+            <div class="form-text small">Upload design mockups, wireframes, project briefs, or reference documents.</div>
+          </div>
+
+          <!-- Escrow & Smart Management Notice -->
+          <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-25 mb-4 small text-dark">
+            <div class="fw-bold text-success mb-1"><i class="bi bi-shield-check me-1"></i> Hirevo Smart Protection Included</div>
+            <div>
+              Your simulated payment will be held safely in simulated escrow. Funds are only released when you approve the final delivery. 
+              If the freelancer exceeds the deadline, Hirevo's automatic delay detector applies a 5% delay penalty and platform administrators assign backup talent.
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <a href="{% url 'gig_detail' gig.id %}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left me-1"></i> Back to Gig
+            </a>
+            <button type="submit" class="btn btn-hirevo btn-lg px-4">
+              Proceed to Simulated Payment <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

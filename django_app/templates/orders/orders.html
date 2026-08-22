@@ -1,0 +1,32 @@
+{% extends 'partials/base.html' %}
+{% block title %} - My Orders{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="fw-bold mb-4">My Orders</h2>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Gig</th><th>{% if user.is_seller %}Buyer{% else %}Seller{% endif %}</th>
+          <th>Price</th><th>Status</th><th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td>
+            <a href="{% url 'gig_detail' order.gig.pk %}" class="text-decoration-none fw-semibold">{{ order.gig.title }}</a>
+          </td>
+          <td>{% if user.is_seller %}{{ order.buyer.username }}{% else %}{{ order.seller.username }}{% endif %}</td>
+          <td class="text-success fw-bold">${{ order.price }}</td>
+          <td><span class="badge bg-success">Completed</span></td>
+          <td class="text-muted small">{{ order.created_at|date:"M d, Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-4">No orders yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

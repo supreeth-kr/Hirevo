@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}My Orders - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-primary bg-opacity-10 text-primary small">Client Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'client_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'client_orders' %}" class="sidebar-nav-item active"><i class="bi bi-receipt"></i> My Orders</a>
+        <a href="{% url 'messages_inbox' %}" class="sidebar-nav-item"><i class="bi bi-chat-dots"></i> Messages</a>
+        <a href="{% url 'client_payments' %}" class="sidebar-nav-item"><i class="bi bi-credit-card"></i> Payment History</a>
+        <a href="{% url 'client_profile' %}" class="sidebar-nav-item"><i class="bi bi-person-gear"></i> Profile Settings</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="h3 fw-bold mb-1">My Orders & Projects</h2>
+          <p class="text-muted small mb-0">Track live orders, deliverables, revisions, and status.</p>
+        </div>
+        <a href="{% url 'gig_list' %}" class="btn btn-hirevo btn-sm">Place New Order</a>
+      </div>
+
+      <!-- Filter Badges -->
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="{% url 'client_orders' %}" class="btn btn-sm {% if not status_filter %}btn-dark{% else %}btn-outline-secondary{% endif %}">All</a>
+        <a href="{% url 'client_orders' %}?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Pending</a>
+        <a href="{% url 'client_orders' %}?status=in_progress" class="btn btn-sm {% if status_filter == 'in_progress' %}btn-dark{% else %}btn-outline-secondary{% endif %}">In Progress</a>
+        <a href="{% url 'client_orders' %}?status=submitted" class="btn btn-sm {% if status_filter == 'submitted' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Submitted</a>
+        <a href="{% url 'client_orders' %}?status=completed" class="btn btn-sm {% if status_filter == 'completed' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Completed</a>
+        <a href="{% url 'client_orders' %}?status=delayed" class="btn btn-sm {% if status_filter == 'delayed' %}btn-danger text-white{% else %}btn-outline-danger{% endif %}">Delayed</a>
+      </div>
+
+      <!-- Orders List Table -->
+      <div class="hirevo-card p-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>Order ID</th>
+                <th>Gig Title</th>
+                <th>Freelancer</th>
+                <th>Package</th>
+                <th>Price</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody class="small">
+              {% for order in page_obj %}
+                <tr>
+                  <td class="fw-bold text-primary">{{ order.order_id }}</td>
+                  <td class="fw-semibold text-truncate" style="max-width: 220px;">{{ order.gig.title }}</td>
+                  <td>
+                    <a href="{% url 'freelancer_public_profile' order.freelancer.id %}" class="text-dark text-decoration-none">
+                      {{ order.freelancer.username }}
+                    </a>
+                  </td>
+                  <td><span class="badge bg-light text-dark border">{{ order.package.name }}</span></td>
+                  <td class="fw-bold text-success">₹{{ order.price }}</td>
+                  <td class="text-muted">{{ order.deadline|date:"d M Y, H:i"|default:"TBD" }}</td>
+                  <td>
+                    <span class="badge-status {{ order.status }}">{{ order.get_status_display }}</span>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <a href="{% url 'messages_thread' order.freelancer.id %}" class="btn btn-sm btn-outline-success" title="Message {{ order.freelancer.username }}">
+                        <i class="bi bi-chat-dots"></i><span class="visually-hidden">Message freelancer</span>
+                      </a>
+                      <a href="{% url 'client_order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+                        Manage <i class="bi bi-arrow-right ms-1"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="8" class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                    No orders found.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+          <nav class="mt-4">
+            <ul class="pagination pagination-sm justify-content-center">
+              {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">Previous</a></li>
+              {% endif %}
+              <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+              {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">Next</a></li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

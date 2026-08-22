@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Administrator Security Portal - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+      
+      <!-- Admin Security Portal Card -->
+      <div class="card border-0 shadow-lg bg-dark text-white rounded-4 overflow-hidden">
+        
+        <!-- Top Security Header Bar -->
+        <div class="bg-danger bg-gradient p-3 text-center d-flex align-items-center justify-content-center gap-2">
+          <i class="bi bi-shield-lock-fill fs-4 text-white"></i>
+          <span class="fw-bold text-uppercase tracking-wider fs-6 text-white">Hirevo Operations Center</span>
+        </div>
+
+        <div class="p-4 p-md-5">
+          <div class="text-center mb-4">
+            <div class="d-inline-flex p-3 rounded-circle bg-danger-subtle text-danger mb-3">
+              <i class="bi bi-person-badge-fill fs-2"></i>
+            </div>
+            <h4 class="fw-bold text-white mb-1">Administrator Sign In</h4>
+            <p class="text-secondary small">Restricted to Platform Operations, Superusers & Staff</p>
+          </div>
+
+          <!-- Security Badges Banner -->
+          <div class="p-3 mb-4 rounded-3 bg-black border border-secondary border-opacity-25 small">
+            <div class="d-flex align-items-center justify-content-between text-secondary mb-1">
+              <span><i class="bi bi-shield-check text-success me-1"></i> Access Protocol:</span>
+              <span class="text-white fw-bold">Level 1 Staff</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between text-secondary mb-1">
+              <span><i class="bi bi-database-fill-gear text-info me-1"></i> Management Scope:</span>
+              <span class="text-white fw-bold">Full Platform Operations</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between text-secondary">
+              <span><i class="bi bi-activity text-warning me-1"></i> Continuity Engine:</span>
+              <span class="text-white fw-bold">Live Monitoring Active</span>
+            </div>
+          </div>
+
+          {% if logged_in_non_admin %}
+            <div class="alert alert-warning py-2 small mb-3">
+              <i class="bi bi-exclamation-triangle-fill me-1"></i>
+              You are currently signed in with a regular client/freelancer account. Please <a href="{% url 'logout' %}" class="alert-link">logout here</a> first to sign in as Administrator.
+            </div>
+          {% endif %}
+
+          <!-- Authentication Form -->
+          <form method="post" action="{% url 'admin_login' %}{% if next %}?next={{ next }}{% endif %}">
+            {% csrf_token %}
+            {% if next %}
+              <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-light" for="{{ form.username.id_for_label }}">
+                <i class="bi bi-person-fill text-danger me-1"></i> Administrator Username
+              </label>
+              {{ form.username }}
+              {% if form.username.errors %}
+                <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-light" for="{{ form.password.id_for_label }}">
+                <i class="bi bi-key-fill text-danger me-1"></i> Security Password
+              </label>
+              {{ form.password }}
+              {% if form.password.errors %}
+                <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger py-2 small mb-3">
+                {{ form.non_field_errors.0 }}
+              </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-danger w-100 py-2 fw-bold shadow-sm mb-3">
+              <i class="bi bi-unlock-fill me-1"></i> Authenticate & Open Operations Dashboard
+            </button>
+          </form>
+
+          <!-- What Admin Can Monitor Info -->
+          <div class="border-top border-secondary border-opacity-50 pt-3 mt-3">
+            <h6 class="text-secondary small fw-bold text-uppercase mb-2">
+              <i class="bi bi-info-circle me-1"></i> Platform Control Center Includes:
+            </h6>
+            <ul class="list-unstyled text-secondary small mb-0 d-flex flex-column gap-1">
+              <li><i class="bi bi-check2 text-success me-1"></i> Real-time Overdue Project & Delay Detection</li>
+              <li><i class="bi bi-check2 text-success me-1"></i> AI-Ranked Backup Freelancer Assignments</li>
+              <li><i class="bi bi-check2 text-success me-1"></i> User Account & Gig Lifecycle Moderation</li>
+              <li><i class="bi bi-check2 text-success me-1"></i> Escrow Financial Transactions & Penalty Ledgers</li>
+            </ul>
+          </div>
+
+          <!-- Return to Public Portal -->
+          <div class="text-center pt-3 mt-3 border-top border-secondary border-opacity-25">
+            <span class="text-secondary small">Looking for standard marketplace?</span>
+            <a href="{% url 'login' %}" class="fw-semibold text-success text-decoration-none small ms-1">
+              Client & Freelancer Login <i class="bi bi-arrow-right-short"></i>
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

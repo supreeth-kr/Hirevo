@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ gig.title }} - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'gig_list' %}" class="text-decoration-none">Gigs</a></li>
+      {% if gig.category %}
+        <li class="breadcrumb-item"><a href="{% url 'category_detail' gig.category.slug %}" class="text-decoration-none">{{ gig.category.name }}</a></li>
+      {% endif %}
+      <li class="breadcrumb-item active" aria-current="page">{{ gig.title|truncatechars:35 }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <!-- Left Column: Gig Details, Images, Description, Reviews -->
+    <div class="col-lg-8">
+      <h1 class="h2 fw-bold mb-3">{{ gig.title }}</h1>
+
+      <!-- Freelancer Brief Bar -->
+      <div class="d-flex align-items-center gap-3 pb-3 mb-3 border-bottom">
+        <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 44px; height: 44px; font-size: 1.1rem;">
+          {{ gig.freelancer.username|slice:":1"|upper }}
+        </div>
+        <div>
+          <a href="{% url 'freelancer_public_profile' gig.freelancer.id %}" class="text-dark fw-bold text-decoration-none">
+            {{ gig.freelancer.full_name|default:gig.freelancer.username }}
+          </a>
+          <div class="d-flex align-items-center gap-2 small text-muted">
+            <span class="d-flex align-items-center gap-1 text-warning fw-bold">
+              <i class="bi bi-star-fill"></i> {{ gig.avg_rating|default:"5.0" }}
+            </span>
+            <span>&bull;</span>
+            <span>{{ gig.total_reviews }} review{{ gig.total_reviews|pluralize }}</span>
+            <span>&bull;</span>
+            <span class="text-success"><i class="bi bi-patch-check-fill"></i> Verified Freelancer</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gig Cover Image -->
+      <div class="hirevo-card mb-4 overflow-hidden" style="max-height: 420px; background-color: #0f172a;">
+        {% if gig.cover_image %}
+          <img src="{{ gig.cover_image.url }}" alt="{{ gig.title }}" class="img-fluid w-100 object-fit-cover" style="max-height: 420px;">
+        {% else %}
+          <div class="py-5 text-center text-muted">
+            <i class="bi bi-image fs-1 d-block mb-2"></i>
+            <span>Service Illustration Preview</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- About This Gig -->
+      <div class="hirevo-card p-4 mb-4">
+        <h4 class="fw-bold mb-3">About This Gig</h4>
+        <div class="text-secondary lh-lg mb-4" style="white-space: pre-line;">
+          {{ gig.description }}
+        </div>
+
+        {% if gig.requirements %}
+          <h5 class="fw-bold mb-2">Requirements for Buyer</h5>
+          <div class="p-3 bg-light rounded text-muted small mb-4" style="white-space: pre-line;">
+            {{ gig.requirements }}
+          </div>
+        {% endif %}
+
+        {% if gig.faqs %}
+          <h5 class="fw-bold mb-2">Frequently Asked Questions</h5>
+          <div class="p-3 bg-light rounded text-muted small mb-4" style="white-space: pre-line;">
+            {{ gig.faqs }}
+          </div>
+        {% endif %}
+
+        <!-- Tags -->
+        {% if gig.tags_list %}
+          <h6 class="fw-bold mb-2">Service Tags</h6>
+          <div class="d-flex flex-wrap gap-2">
+            {% for tag in gig.tags_list %}
+              <a href="{% url 'gig_list' %}?q={{ tag }}" class="badge bg-light text-dark border text-decoration-none py-2 px-3">
+                #{{ tag }}
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- About the Freelancer Card -->
+      <div class="hirevo-card p-4 mb-4">
+        <h4 class="fw-bold mb-3">About The Seller</h4>
+        <div class="row g-3 align-items-center mb-3">
+          <div class="col-auto">
+            <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 64px; height: 64px; font-size: 1.5rem;">
+              {{ gig.freelancer.username|slice:":1"|upper }}
+            </div>
+          </div>
+          <div class="col">
+            <h5 class="fw-bold mb-1">{{ gig.freelancer.full_name|default:gig.freelancer.username }}</h5>
+            <p class="text-muted small mb-1">{{ freelancer_profile.bio|default:"Professional freelance developer on Hirevo."|truncatewords:25 }}</p>
+            <div class="d-flex gap-3 small text-muted">
+              <span><i class="bi bi-clock-history me-1"></i> Member since {{ gig.freelancer.date_joined|date:"M Y" }}</span>
+              <span><i class="bi bi-geo-alt me-1"></i> {{ freelancer_profile.location|default:"Global" }}</span>
+            </div>
+          </div>
+          <div class="col-auto">
+            <a href="{% url 'messages_thread' gig.freelancer.id %}" class="btn btn-hirevo-outline btn-sm">
+              <i class="bi bi-chat-dots me-1"></i> Contact Seller
+            </a>
+          </div>
+        </div>
+
+        {% if freelancer_profile.skills.all %}
+          <div class="pt-3 border-top">
+            <div class="small fw-bold text-muted mb-2">Skills & Expertise:</div>
+            <div class="d-flex flex-wrap gap-1">
+              {% for s in freelancer_profile.skills.all %}
+                <span class="badge bg-light text-secondary border">{{ s.name }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Reviews Section -->
+      <div class="hirevo-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="fw-bold mb-0">Client Reviews</h4>
+          <div class="d-flex align-items-center gap-1 text-warning fs-5">
+            <i class="bi bi-star-fill"></i>
+            <span class="fw-bold text-dark">{{ gig.avg_rating|default:"5.0" }}</span>
+            <span class="text-muted small">({{ gig.total_reviews }} review{{ gig.total_reviews|pluralize }})</span>
+          </div>
+        </div>
+
+        {% for rev in reviews %}
+          <div class="border-bottom pb-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <div class="d-flex align-items-center gap-2">
+                <div class="rounded-circle bg-light border text-center fw-bold text-secondary" style="width: 32px; height: 32px; line-height: 32px; font-size: 0.8rem;">
+                  {{ rev.client.username|slice:":1"|upper }}
+                </div>
+                <span class="fw-bold text-dark small">{{ rev.client.username }}</span>
+              </div>
+              <div class="small text-muted">{{ rev.created_at|date:"d M Y" }}</div>
+            </div>
+            <div class="text-warning small mb-1">
+              {% for i in "12345" %}
+                {% if forloop.counter <= rev.rating %}
+                  <i class="bi bi-star-fill"></i>
+                {% else %}
+                  <i class="bi bi-star"></i>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <p class="text-secondary small mb-0">{{ rev.comment }}</p>
+          </div>
+        {% empty %}
+          <p class="text-muted small mb-0">No reviews submitted yet for this service.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right Column: Package Pricing Cards & Ordering -->
+    <div class="col-lg-4">
+      <div class="hirevo-card sticky-top shadow-sm" style="top: 80px; z-index: 10;">
+        <!-- Packages Tabs -->
+        <ul class="nav nav-pills nav-fill bg-light border-bottom p-1" id="packageTab" role="tablist">
+          {% if basic_pkg %}
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active fw-bold small py-2" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">Basic</button>
+            </li>
+          {% endif %}
+          {% if standard_pkg %}
+            <li class="nav-item" role="presentation">
+              <button class="nav-link fw-bold small py-2 {% if not basic_pkg %}active{% endif %}" id="standard-tab" data-bs-toggle="tab" data-bs-target="#standard" type="button" role="tab">Standard</button>
+            </li>
+          {% endif %}
+          {% if premium_pkg %}
+            <li class="nav-item" role="presentation">
+              <button class="nav-link fw-bold small py-2 {% if not basic_pkg and not standard_pkg %}active{% endif %}" id="premium-tab" data-bs-toggle="tab" data-bs-target="#premium" type="button" role="tab">Premium</button>
+            </li>
+          {% endif %}
+        </ul>
+
+        <div class="tab-content p-4" id="packageTabContent">
+          {% if basic_pkg %}
+            <div class="tab-pane fade show active" id="basic" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-baseline mb-3">
+                <h5 class="fw-bold mb-0">{{ basic_pkg.name }}</h5>
+                <span class="fs-4 fw-extrabold text-success">₹{{ basic_pkg.price }}</span>
+              </div>
+              <p class="text-muted small mb-3">{{ basic_pkg.description }}</p>
+
+              <div class="d-flex gap-4 small text-muted fw-semibold mb-4">
+                <span><i class="bi bi-clock me-1 text-dark"></i> {{ basic_pkg.delivery_days }} Days Delivery</span>
+                <span><i class="bi bi-arrow-repeat me-1 text-dark"></i> {% if basic_pkg.revisions == -1 %}Unlimited{% else %}{{ basic_pkg.revisions }}{% endif %} Revisions</span>
+              </div>
+
+              {% if basic_pkg.features_list %}
+                <ul class="list-unstyled small mb-4">
+                  {% for feat in basic_pkg.features_list %}
+                    <li class="mb-2 text-secondary"><i class="bi bi-check2 text-success me-2 fw-bold"></i> {{ feat }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+
+              <a href="{% url 'place_order' gig.id 'basic' %}" class="btn btn-hirevo w-100 py-2 fw-bold">
+                Order Now (₹{{ basic_pkg.price }})
+              </a>
+            </div>
+          {% endif %}
+
+          {% if standard_pkg %}
+            <div class="tab-pane fade {% if not basic_pkg %}show active{% endif %}" id="standard" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-baseline mb-3">
+                <h5 class="fw-bold mb-0">{{ standard_pkg.name }}</h5>
+                <span class="fs-4 fw-extrabold text-success">₹{{ standard_pkg.price }}</span>
+              </div>
+              <p class="text-muted small mb-3">{{ standard_pkg.description }}</p>
+
+              <div class="d-flex gap-4 small text-muted fw-semibold mb-4">
+                <span><i class="bi bi-clock me-1 text-dark"></i> {{ standard_pkg.delivery_days }} Days Delivery</span>
+                <span><i class="bi bi-arrow-repeat me-1 text-dark"></i> {% if standard_pkg.revisions == -1 %}Unlimited{% else %}{{ standard_pkg.revisions }}{% endif %} Revisions</span>
+              </div>
+
+              {% if standard_pkg.features_list %}
+                <ul class="list-unstyled small mb-4">
+                  {% for feat in standard_pkg.features_list %}
+                    <li class="mb-2 text-secondary"><i class="bi bi-check2 text-success me-2 fw-bold"></i> {{ feat }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+
+              <a href="{% url 'place_order' gig.id 'standard' %}" class="btn btn-hirevo w-100 py-2 fw-bold">
+                Order Now (₹{{ standard_pkg.price }})
+              </a>
+            </div>
+          {% endif %}
+
+          {% if premium_pkg %}
+            <div class="tab-pane fade {% if not basic_pkg and not standard_pkg %}show active{% endif %}" id="premium" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-baseline mb-3">
+                <h5 class="fw-bold mb-0">{{ premium_pkg.name }}</h5>
+                <span class="fs-4 fw-extrabold text-success">₹{{ premium_pkg.price }}</span>
+              </div>
+              <p class="text-muted small mb-3">{{ premium_pkg.description }}</p>
+
+              <div class="d-flex gap-4 small text-muted fw-semibold mb-4">
+                <span><i class="bi bi-clock me-1 text-dark"></i> {{ premium_pkg.delivery_days }} Days Delivery</span>
+                <span><i class="bi bi-arrow-repeat me-1 text-dark"></i> {% if premium_pkg.revisions == -1 %}Unlimited{% else %}{{ premium_pkg.revisions }}{% endif %} Revisions</span>
+              </div>
+
+              {% if premium_pkg.features_list %}
+                <ul class="list-unstyled small mb-4">
+                  {% for feat in premium_pkg.features_list %}
+                    <li class="mb-2 text-secondary"><i class="bi bi-check2 text-success me-2 fw-bold"></i> {{ feat }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+
+              <a href="{% url 'place_order' gig.id 'premium' %}" class="btn btn-hirevo w-100 py-2 fw-bold">
+                Order Now (₹{{ premium_pkg.price }})
+              </a>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="p-3 bg-light border-top text-center">
+          <a href="{% url 'messages_thread' gig.freelancer.id %}" class="small text-muted text-decoration-none">
+            <i class="bi bi-chat-left-text me-1"></i> Have custom questions? Message Seller
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

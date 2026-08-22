@@ -1,0 +1,51 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+  <div style="text-align: center; margin-bottom: 24px;">
+    <div style="display: inline-block; padding: 6px 16px; border-radius: 20px; background: rgba(239, 68, 68, 0.15); color: #f87171; font-weight: 700; font-size: 12px; text-transform: uppercase; margin-bottom: 12px; border: 1px solid rgba(239, 68, 68, 0.4);">
+      Overdue Deadline Alert
+    </div>
+    <h2 style="color: #ffffff; margin: 0 0 8px 0; font-size: 20px; font-weight: 700;">Order Marked Delayed – Penalty Notice</h2>
+    <p style="color: #94a3b8; margin: 0; font-size: 14px;">Missed Delivery Deadline on Order <span style="color: #10b981; font-family: monospace;">{{ order.order_id }}</span></p>
+  </div>
+
+  <p>Hello <strong>{{ user.full_name|default:user.username }}</strong>,</p>
+  <p>The agreed delivery deadline (<strong>{{ order.deadline|date:"d M Y, h:i A" }}</strong>) for order <strong>{{ order.order_id }}</strong> has expired without completed and approved delivery.</p>
+
+  <div class="info-card" style="border-left: 4px solid #ef4444;">
+    <table class="info-table">
+      <tr>
+        <td class="info-label">Order ID</td>
+        <td class="info-value"><span style="color: #10b981; font-family: monospace;">{{ order.order_id }}</span></td>
+      </tr>
+      <tr>
+        <td class="info-label">Gig / Service</td>
+        <td class="info-value">{{ order.gig.title }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Order Amount</td>
+        <td class="info-value">&#8377;{{ order.price }}</td>
+      </tr>
+      {% if penalty %}
+      <tr>
+        <td class="info-label">Delay Penalty</td>
+        <td class="info-value" style="color: #ef4444;">&#8377;{{ penalty.penalty_amount }} ({{ penalty.percentage }}%)</td>
+      </tr>
+      {% endif %}
+      <tr>
+        <td class="info-label">Project Status</td>
+        <td class="info-value"><span class="status-pill" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">Delayed</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; padding: 14px 18px; border-radius: 8px; margin: 20px 0;">
+    <p style="margin: 0; font-size: 13px; color: #fbbf24;">
+      <strong>Policy Notice:</strong> Under Hirevo's project continuity framework, platform administration may assign a backup specialist to assist the client in completing this order. Repeated missed deadlines will negatively impact your profile rating and AI match rank.
+    </p>
+  </div>
+
+  <div style="text-align: center; margin: 24px 0;">
+    <a href="{{ project_url }}" class="btn-primary">View Project Details</a>
+  </div>
+{% endblock %}

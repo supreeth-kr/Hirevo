@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Backup Project Assignments - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-success bg-opacity-10 text-success small">Freelancer Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'freelancer_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'freelancer_gigs' %}" class="sidebar-nav-item"><i class="bi bi-collection"></i> My Gigs</a>
+        <a href="{% url 'freelancer_orders' %}" class="sidebar-nav-item"><i class="bi bi-list-task"></i> Orders</a>
+        <a href="{% url 'freelancer_backup_assignments' %}" class="sidebar-nav-item active"><i class="bi bi-shield-check text-info"></i> Backup Assignments</a>
+        <a href="{% url 'freelancer_earnings' %}" class="sidebar-nav-item"><i class="bi bi-wallet2"></i> Earnings & Penalties</a>
+        <a href="{% url 'freelancer_profile' %}" class="sidebar-nav-item"><i class="bi bi-person-gear"></i> Profile Settings</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold mb-1">Backup Project Assignments</h3>
+          <p class="text-muted small mb-0">Projects assigned to you by Administrator to ensure client project continuity.</p>
+        </div>
+      </div>
+
+      <div class="d-flex flex-column gap-3">
+        {% for a in assignments %}
+          <div class="hirevo-card p-4 {% if a.status == 'assigned' %}border-start border-4 border-info{% endif %}">
+            <div class="row g-3 align-items-center">
+              <div class="col-md-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="badge bg-info bg-opacity-10 text-info fw-bold">Order {{ a.order.order_id }}</span>
+                  <span class="badge-status {{ a.status }}">{{ a.get_status_display }}</span>
+                  <span class="text-muted small">Assigned on {{ a.assigned_at|date:"d M Y, H:i" }}</span>
+                </div>
+
+                <h5 class="fw-bold text-dark mb-1">{{ a.order.gig.title }}</h5>
+                <div class="small text-muted mb-2">
+                  Client: <strong class="text-dark">{{ a.order.client.username }}</strong> &bull;
+                  Original Primary Freelancer: <strong class="text-secondary">{{ a.primary_freelancer.username }}</strong> &bull;
+                  Order Value: <strong class="text-success">₹{{ a.order.price }}</strong>
+                </div>
+
+                <div class="p-2 bg-light rounded small text-secondary">
+                  <strong>Assignment Reason:</strong> {{ a.reason }}
+                </div>
+              </div>
+
+              <div class="col-md-4 text-md-end">
+                {% if a.status == 'assigned' %}
+                  <div class="d-flex flex-column flex-md-row justify-content-md-end gap-2">
+                    <a href="{% url 'freelancer_backup_respond' a.id 'accept' %}" class="btn btn-success btn-sm fw-bold">
+                      <i class="bi bi-check-circle me-1"></i> Accept Assignment
+                    </a>
+                    <a href="{% url 'freelancer_backup_respond' a.id 'reject' %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Decline this backup assignment?');">
+                      Decline
+                    </a>
+                  </div>
+                {% elif a.status == 'accepted' %}
+                  <a href="{% url 'freelancer_order_detail' a.order.id %}" class="btn btn-hirevo btn-sm">
+                    <i class="bi bi-arrow-right-circle me-1"></i> Open Workspace
+                  </a>
+                {% else %}
+                  <span class="badge bg-secondary">Declined</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="hirevo-card p-5 text-center text-muted">
+            <i class="bi bi-shield-check fs-1 d-block mb-2 text-success"></i>
+            <h5>No backup project assignments pending.</h5>
+            <p class="small text-muted">When platform administrators assign you to an overdue project matching your skillset, it will appear here.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

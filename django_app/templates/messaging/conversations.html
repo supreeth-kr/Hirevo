@@ -1,0 +1,32 @@
+{% extends 'partials/base.html' %}
+{% block title %} - Messages{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="fw-bold mb-4">Messages</h2>
+  <div class="list-group">
+    {% for conv in conversations %}
+    <a href="{% url 'conversation_detail' conv.pk %}" class="list-group-item list-group-item-action">
+      <div class="d-flex align-items-center gap-3">
+        {% if user.is_seller %}
+          {% if conv.buyer.image %}<img src="{{ conv.buyer.image }}" class="rounded-circle" width="40" height="40" style="object-fit:cover">{% else %}<i class="bi bi-person-circle fs-3"></i>{% endif %}
+          <div>
+            <strong>{{ conv.buyer.username }}</strong>
+            <p class="mb-0 text-muted small">{{ conv.last_message|truncatechars:60 }}</p>
+          </div>
+          {% if not conv.read_by_seller %}<span class="badge bg-success ms-auto">New</span>{% endif %}
+        {% else %}
+          {% if conv.seller.image %}<img src="{{ conv.seller.image }}" class="rounded-circle" width="40" height="40" style="object-fit:cover">{% else %}<i class="bi bi-person-circle fs-3"></i>{% endif %}
+          <div>
+            <strong>{{ conv.seller.username }}</strong>
+            <p class="mb-0 text-muted small">{{ conv.last_message|truncatechars:60 }}</p>
+          </div>
+          {% if not conv.read_by_buyer %}<span class="badge bg-success ms-auto">New</span>{% endif %}
+        {% endif %}
+      </div>
+    </a>
+    {% empty %}
+    <div class="text-center text-muted py-5"><i class="bi bi-chat-dots fs-1"></i><p class="mt-2">No conversations yet.</p></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

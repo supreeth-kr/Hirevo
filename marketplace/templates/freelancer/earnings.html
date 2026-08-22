@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}Earnings & Penalties - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-success bg-opacity-10 text-success small">Freelancer Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'freelancer_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'freelancer_gigs' %}" class="sidebar-nav-item"><i class="bi bi-collection"></i> My Gigs</a>
+        <a href="{% url 'freelancer_orders' %}" class="sidebar-nav-item"><i class="bi bi-list-task"></i> Orders</a>
+        <a href="{% url 'freelancer_backup_assignments' %}" class="sidebar-nav-item"><i class="bi bi-shield-check text-info"></i> Backup Assignments</a>
+        <a href="{% url 'freelancer_earnings' %}" class="sidebar-nav-item active"><i class="bi bi-wallet2"></i> Earnings & Penalties</a>
+        <a href="{% url 'freelancer_profile' %}" class="sidebar-nav-item"><i class="bi bi-person-gear"></i> Profile Settings</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <h3 class="fw-bold mb-1">Financial Earnings & Penalty Ledger</h3>
+      <p class="text-muted small mb-4">Complete breakdown of completed disbursements, in-escrow pending funds, and delay deductions.</p>
+
+      <!-- KPI Financial Summary Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-md">
+          <div class="stat-kpi-card">
+            <div class="text-muted small fw-semibold">Net Realized Earnings</div>
+            <div class="h3 fw-bold text-success mb-0">₹{{ earnings.net_earnings }}</div>
+            <div class="text-muted small" style="font-size: 0.7rem;">Orders + revisions − penalties</div>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="stat-kpi-card">
+            <div class="text-muted small fw-semibold">Gross Paid Orders</div>
+            <div class="h3 fw-bold text-dark mb-0">₹{{ earnings.total }}</div>
+            <div class="text-muted small" style="font-size: 0.7rem;">{{ earnings.completed_count }} paid order{{ earnings.completed_count|pluralize }}</div>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="stat-kpi-card">
+            <div class="text-muted small fw-semibold">Extra Revision Earnings</div>
+            <div class="h3 fw-bold text-success mb-0">₹{{ earnings.extra_revisions }}</div>
+            <div class="text-muted small" style="font-size: 0.7rem;">{{ earnings.extra_revision_count }} paid revision{{ earnings.extra_revision_count|pluralize }}</div>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="stat-kpi-card">
+            <div class="text-muted small fw-semibold">In Escrow (Pending)</div>
+            <div class="h3 fw-bold text-primary mb-0">₹{{ earnings.pending }}</div>
+            <div class="text-muted small" style="font-size: 0.7rem;">Active projects in progress</div>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="stat-kpi-card">
+            <div class="text-muted small fw-semibold">Delay Penalties (5%)</div>
+            <div class="h3 fw-bold text-danger mb-0">₹{{ earnings.penalties }}</div>
+            <div class="text-muted small" style="font-size: 0.7rem;">Automated missed deadline deductions</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hirevo-card p-4 mb-4">
+        <h5 class="fw-bold mb-3">Paid Extra Revisions</h5>
+        <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light small"><tr><th>Transaction ID</th><th>Order ID</th><th>Client</th><th>Amount</th><th>Paid Date</th></tr></thead><tbody class="small">
+          {% for charge in revision_charges %}<tr><td><code class="fw-bold text-dark">{{ charge.transaction_id }}</code></td><td><a href="{% url 'freelancer_order_detail' charge.revision.order.id %}" class="fw-bold text-primary text-decoration-none">{{ charge.revision.order.order_id }}</a></td><td>{{ charge.revision.client.username }}</td><td class="fw-bold text-success">₹{{ charge.amount }}</td><td class="text-muted">{{ charge.paid_at|date:"d M Y, H:i" }}</td></tr>{% empty %}<tr><td colspan="5" class="text-center py-4 text-muted">No paid extra revisions yet.</td></tr>{% endfor %}
+        </tbody></table></div>
+      </div>
+
+      <!-- Paid Transactions Table -->
+      <div class="hirevo-card p-4 mb-4">
+        <h5 class="fw-bold mb-3">Completed Escrow Payouts</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>Transaction ID</th>
+                <th>Order ID</th>
+                <th>Client</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Paid Date</th>
+              </tr>
+            </thead>
+            <tbody class="small">
+              {% for p in payments %}
+                <tr>
+                  <td><code class="fw-bold text-dark">{{ p.transaction_id }}</code></td>
+                  <td><a href="{% url 'freelancer_order_detail' p.order.id %}" class="fw-bold text-primary text-decoration-none">{{ p.order.order_id }}</a></td>
+                  <td>{{ p.client.username }}</td>
+                  <td class="fw-bold text-success">₹{{ p.amount }}</td>
+                  <td><span class="badge bg-success bg-opacity-10 text-success">Disbursed</span></td>
+                  <td class="text-muted">{{ p.paid_at|date:"d M Y, H:i" }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center py-4 text-muted">No completed transactions yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Delay Penalties Table -->
+      <div class="hirevo-card p-4">
+        <h5 class="fw-bold mb-3 text-danger"><i class="bi bi-exclamation-octagon me-1"></i> Delay Penalties History</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>Order ID</th>
+                <th>Order Amount</th>
+                <th>Penalty (5%)</th>
+                <th>Reason</th>
+                <th>Date Applied</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody class="small">
+              {% for pen in penalties %}
+                <tr>
+                  <td><a href="{% url 'freelancer_order_detail' pen.order.id %}" class="fw-bold text-dark text-decoration-none">{{ pen.order.order_id }}</a></td>
+                  <td>₹{{ pen.order_amount }}</td>
+                  <td class="fw-bold text-danger">₹{{ pen.penalty_amount }}</td>
+                  <td class="text-muted">{{ pen.reason }}</td>
+                  <td class="text-muted">{{ pen.created_at|date:"d M Y, H:i" }}</td>
+                  <td><span class="badge bg-danger bg-opacity-10 text-danger">{{ pen.get_status_display }}</span></td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center py-4 text-muted">Clean record! No penalties applied.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

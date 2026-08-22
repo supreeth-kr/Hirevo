@@ -1,0 +1,45 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+  <div style="text-align: center; margin-bottom: 24px;">
+    <div style="display: inline-block; padding: 6px 16px; border-radius: 20px; background: {{ status_color }}22; color: {{ status_color }}; font-weight: 700; font-size: 12px; text-transform: uppercase; margin-bottom: 12px; border: 1px solid {{ status_color }}55;">
+      {{ status_badge }}
+    </div>
+    <h2 style="color: #ffffff; margin: 0 0 8px 0; font-size: 20px; font-weight: 700;">{{ status_title }}</h2>
+    <p style="color: #94a3b8; margin: 0; font-size: 14px;">Update regarding Order <span style="color: #10b981; font-family: monospace;">{{ order.order_id }}</span></p>
+  </div>
+
+  <p>Hello <strong>{{ user.full_name|default:user.username }}</strong>,</p>
+  <p>{{ message_text }}</p>
+
+  <div class="info-card">
+    <table class="info-table">
+      <tr>
+        <td class="info-label">Order ID</td>
+        <td class="info-value"><span style="color: #10b981; font-family: monospace;">{{ order.order_id }}</span></td>
+      </tr>
+      <tr>
+        <td class="info-label">Gig / Project</td>
+        <td class="info-value">{{ order.gig.title }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Client</td>
+        <td class="info-value">{{ client.full_name|default:client.username }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Current Status</td>
+        <td class="info-value"><span style="color: {{ status_color }}; font-weight: 700;">{{ order.get_status_display }}</span></td>
+      </tr>
+      {% if revision and revision.reason %}
+      <tr>
+        <td class="info-label">Revision Reason</td>
+        <td class="info-value" style="color: #fcd34d; font-weight: normal;">{{ revision.reason }}</td>
+      </tr>
+      {% endif %}
+    </table>
+  </div>
+
+  <div style="text-align: center; margin: 24px 0;">
+    <a href="{{ project_url }}" class="btn-primary">{{ action_label|default:"View Order Details" }}</a>
+  </div>
+{% endblock %}

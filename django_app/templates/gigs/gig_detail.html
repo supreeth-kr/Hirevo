@@ -1,0 +1,97 @@
+{% extends 'partials/base.html' %}
+{% block title %} - {{ gig.title }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-5">
+    <div class="col-lg-8">
+      <h1 class="fw-bold">{{ gig.title }}</h1>
+      <div class="d-flex align-items-center gap-3 mb-4">
+        {% if gig.seller.image %}<img src="{{ gig.seller.image }}" class="rounded-circle" width="40" height="40" style="object-fit:cover">{% endif %}
+        <span class="fw-semibold">{{ gig.seller.username }}</span>
+        <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> {{ gig.avg_rating }}</span>
+        <span class="text-muted small">({{ gig.star_number }} reviews)</span>
+      </div>
+
+      {% if gig.cover %}<img src="{{ gig.cover }}" class="img-fluid rounded mb-4 w-100" style="max-height:400px;object-fit:cover">{% endif %}
+
+      {% if gig.images.all %}
+      <div class="d-flex gap-2 mb-4 flex-wrap">
+        {% for img in gig.images.all %}
+        <img src="{{ img.image }}" class="rounded" style="height:80px;width:100px;object-fit:cover">
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <h4 class="fw-bold">About This Gig</h4>
+      <p>{{ gig.description }}</p>
+
+      {% if gig.features_list %}
+      <h5 class="fw-bold mt-4">What's Included</h5>
+      <ul>{% for f in gig.features_list %}<li>{{ f }}</li>{% endfor %}</ul>
+      {% endif %}
+
+      <!-- Reviews -->
+      <h4 class="fw-bold mt-5">Reviews</h4>
+      {% for review in reviews %}
+      <div class="card mb-3 border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            {% if review.user.image %}<img src="{{ review.user.image }}" class="rounded-circle" width="32" height="32" style="object-fit:cover">{% endif %}
+            <strong>{{ review.user.username }}</strong>
+            <span class="text-warning">{% for i in "12345" %}{% if forloop.counter <= review.star %}★{% else %}☆{% endif %}{% endfor %}</span>
+          </div>
+          <p class="mb-0">{{ review.description }}</p>
+        </div>
+      </div>
+      {% empty %}<p class="text-muted">No reviews yet.</p>
+      {% endfor %}
+
+      {% if user.is_authenticated and not user.is_seller %}
+      <div class="card mt-4 border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="fw-bold">Leave a Review</h5>
+          <form method="post" action="{% url 'create_review' gig.pk %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">Rating</label>
+              <select name="star" class="form-select">
+                <option value="5">★★★★★ (5)</option>
+                <option value="4">★★★★☆ (4)</option>
+                <option value="3">★★★☆☆ (3)</option>
+                <option value="2">★★☆☆☆ (2)</option>
+                <option value="1">★☆☆☆☆ (1)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <textarea name="description" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
+            </div>
+            <button class="btn btn-success">Submit Review</button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm sticky-top" style="top:80px">
+        <div class="card-body">
+          <h5 class="fw-bold">{{ gig.short_title }}</h5>
+          <p class="text-muted small">{{ gig.short_desc }}</p>
+          <h3 class="text-success fw-bold">${{ gig.price }}</h3>
+          <ul class="list-unstyled text-muted small mb-3">
+            <li><i class="bi bi-clock me-2"></i>{{ gig.delivery_time }} delivery</li>
+            <li><i class="bi bi-arrow-repeat me-2"></i>{{ gig.revision_number }} revision(s)</li>
+          </ul>
+          {% if user.is_authenticated and not user.is_seller %}
+          <a href="{% url 'pay' gig.pk %}" class="btn btn-success w-100 mb-2">Continue (${{ gig.price }})</a>
+          <a href="{% url 'start_conversation' gig.seller.pk %}" class="btn btn-outline-secondary w-100">Contact Seller</a>
+          {% elif not user.is_authenticated %}
+          <a href="{% url 'login' %}" class="btn btn-success w-100">Sign in to Order</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

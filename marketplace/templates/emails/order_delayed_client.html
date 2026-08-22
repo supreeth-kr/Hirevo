@@ -1,0 +1,53 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+  <div style="text-align: center; margin-bottom: 24px;">
+    <div style="display: inline-block; padding: 6px 16px; border-radius: 20px; background: rgba(239, 68, 68, 0.15); color: #f87171; font-weight: 700; font-size: 12px; text-transform: uppercase; margin-bottom: 12px; border: 1px solid rgba(239, 68, 68, 0.4);">
+      Delay Detected
+    </div>
+    <h2 style="color: #ffffff; margin: 0 0 8px 0; font-size: 20px; font-weight: 700;">Project Delivery Delay Notice</h2>
+    <p style="color: #94a3b8; margin: 0; font-size: 14px;">Important update regarding Order <span style="color: #10b981; font-family: monospace;">{{ order.order_id }}</span></p>
+  </div>
+
+  <p>Hello <strong>{{ user.full_name|default:user.username }}</strong>,</p>
+  <p>We are writing to inform you that your project deadline (<strong>{{ order.deadline|date:"d M Y, h:i A" }}</strong>) has passed without approved delivery by the primary freelancer (<strong>{{ freelancer.full_name|default:freelancer.username }}</strong>).</p>
+
+  <div class="info-card" style="border-left: 4px solid #ef4444;">
+    <table class="info-table">
+      <tr>
+        <td class="info-label">Order ID</td>
+        <td class="info-value"><span style="color: #10b981; font-family: monospace;">{{ order.order_id }}</span></td>
+      </tr>
+      <tr>
+        <td class="info-label">Gig / Service</td>
+        <td class="info-value">{{ order.gig.title }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Original Deadline</td>
+        <td class="info-value" style="color: #f87171;">{{ order.deadline|date:"d M Y, h:i A" }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Current Status</td>
+        <td class="info-value"><span class="status-pill" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">Delayed</span></td>
+      </tr>
+      <tr>
+        <td class="info-label">Escrow Protection</td>
+        <td class="info-value" style="color: #34d399;">&#8377;{{ order.price }} Fully Secured</td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 14px 18px; border-radius: 8px; margin: 20px 0;">
+    <h4 style="color: #60a5fa; margin: 0 0 6px 0; font-size: 14px; font-weight: 700;">Hirevo Continuity Protection in Action:</h4>
+    <ul style="margin: 0; padding-left: 18px; color: #cbd5e1; font-size: 13px; line-height: 1.5;">
+      <li>Platform administrators have been alerted immediately.</li>
+      <li>Our AI matching engine has shortlisted qualified, top-rated backup specialists for your project.</li>
+      <li>An administrator will assign a vetted backup freelancer to take over and complete your deliverables.</li>
+      <li>Your funds remain securely locked in escrow until you approve the final delivery.</li>
+    </ul>
+  </div>
+
+  <div style="text-align: center; margin: 24px 0;">
+    <a href="{{ project_url }}" class="btn-primary">View Project Timeline</a>
+  </div>
+{% endblock %}

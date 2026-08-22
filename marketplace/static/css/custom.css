@@ -1,0 +1,490 @@
+/* =========================================================
+   HIREVO MODERN DESIGN SYSTEM & CUSTOM CSS
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --hirevo-primary: #0f172a;
+  --hirevo-primary-hover: #1e293b;
+  --hirevo-accent: #10b981;
+  --hirevo-accent-hover: #059669;
+  --hirevo-accent-light: #ecfdf5;
+  --hirevo-indigo: #6366f1;
+  --hirevo-indigo-light: #eef2ff;
+  --hirevo-warning: #f59e0b;
+  --hirevo-warning-light: #fef3c7;
+  --hirevo-danger: #ef4444;
+  --hirevo-danger-light: #fef2f2;
+  --hirevo-bg: #f8fafc;
+  --hirevo-card-bg: #ffffff;
+  --hirevo-text-main: #1e293b;
+  --hirevo-text-muted: #64748b;
+  --hirevo-border: #e2e8f0;
+  --hirevo-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --hirevo-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+  --hirevo-shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+  --hirevo-radius: 12px;
+  --hirevo-radius-sm: 8px;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--hirevo-bg);
+  color: var(--hirevo-text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6, .brand-font {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  color: var(--hirevo-primary);
+  letter-spacing: -0.02em;
+}
+
+/* =========================================================
+   NAVBAR & HEADER
+   ========================================================= */
+
+.hirevo-navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--hirevo-border);
+  padding: 0.75rem 0;
+  box-shadow: var(--hirevo-shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+}
+
+.hirevo-brand {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--hirevo-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.hirevo-brand .brand-badge {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.nav-category-bar {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--hirevo-border);
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0.5rem 0;
+}
+
+.nav-category-bar::-webkit-scrollbar {
+  height: 3px;
+}
+
+.nav-category-bar::-webkit-scrollbar-thumb {
+  background-color: var(--hirevo-border);
+}
+
+.cat-link {
+  color: var(--hirevo-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cat-link:hover, .cat-link.active {
+  color: var(--hirevo-accent);
+  background-color: var(--hirevo-accent-light);
+}
+
+/* =========================================================
+   BUTTONS & BADGES
+   ========================================================= */
+
+.btn-hirevo {
+  background-color: var(--hirevo-accent);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: var(--hirevo-radius-sm);
+  padding: 0.6rem 1.25rem;
+  border: none;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-hirevo:hover {
+  background-color: var(--hirevo-accent-hover);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.btn-hirevo-dark {
+  background-color: var(--hirevo-primary);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: var(--hirevo-radius-sm);
+  padding: 0.6rem 1.25rem;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-hirevo-dark:hover {
+  background-color: var(--hirevo-primary-hover);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-hirevo-outline {
+  background-color: transparent;
+  color: var(--hirevo-primary);
+  border: 1px solid var(--hirevo-border);
+  font-weight: 600;
+  border-radius: var(--hirevo-radius-sm);
+  padding: 0.55rem 1.15rem;
+  transition: all 0.2s ease;
+}
+
+.btn-hirevo-outline:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  color: var(--hirevo-primary);
+}
+
+.badge-status {
+  padding: 0.35rem 0.75rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  border-radius: 20px;
+  text-transform: capitalize;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.badge-status.pending { background-color: var(--hirevo-warning-light); color: #b45309; }
+.badge-status.accepted { background-color: #e0f2fe; color: #0369a1; }
+.badge-status.in_progress { background-color: var(--hirevo-indigo-light); color: #4338ca; }
+.badge-status.submitted { background-color: #f3e8ff; color: #7e22ce; }
+.badge-status.revision_requested { background-color: #ffedd5; color: #c2410c; }
+.badge-status.completed { background-color: var(--hirevo-accent-light); color: #047857; }
+.badge-status.delayed { background-color: var(--hirevo-danger-light); color: #b91c1c; }
+.badge-status.backup_assigned { background-color: #ecfeff; color: #0e7490; }
+.badge-status.cancelled { background-color: #f1f5f9; color: #475569; }
+
+/* =========================================================
+   CARDS & CONTAINERS
+   ========================================================= */
+
+.hirevo-card {
+  background-color: var(--hirevo-card-bg);
+  border: 1px solid var(--hirevo-border);
+  border-radius: var(--hirevo-radius);
+  box-shadow: var(--hirevo-shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.hirevo-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--hirevo-shadow-lg);
+  border-color: #cbd5e1;
+}
+
+.gig-card-img-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background-color: #0f172a;
+}
+
+.gig-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.hirevo-card-hover:hover .gig-card-img {
+  transform: scale(1.04);
+}
+
+.gig-badge-category {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+/* =========================================================
+   DASHBOARD SIDEBAR & LAYOUT
+   ========================================================= */
+
+.dashboard-wrapper {
+  display: flex;
+  min-height: calc(100vh - 120px);
+}
+
+.dashboard-sidebar {
+  width: 260px;
+  background-color: #ffffff;
+  border-right: 1px solid var(--hirevo-border);
+  padding: 1.5rem 1rem;
+  flex-shrink: 0;
+}
+
+.dashboard-content {
+  flex-grow: 1;
+  padding: 2rem;
+  background-color: var(--hirevo-bg);
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  color: var(--hirevo-text-muted);
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-radius: var(--hirevo-radius-sm);
+  text-decoration: none;
+  transition: all 0.15s ease;
+  margin-bottom: 0.25rem;
+}
+
+.sidebar-nav-item i {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar-nav-item:hover {
+  background-color: #f1f5f9;
+  color: var(--hirevo-primary);
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--hirevo-accent-light);
+  color: var(--hirevo-accent);
+  font-weight: 600;
+}
+
+.stat-kpi-card {
+  background-color: #ffffff;
+  border: 1px solid var(--hirevo-border);
+  border-radius: var(--hirevo-radius);
+  padding: 1.25rem;
+  box-shadow: var(--hirevo-shadow-sm);
+}
+
+.stat-kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+/* =========================================================
+   PROJECT TIMELINE WIDGET
+   ========================================================= */
+
+.project-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.project-timeline::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 8px;
+  width: 2px;
+  background-color: var(--hirevo-border);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -2rem;
+  top: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 3px solid var(--hirevo-accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.timeline-dot.danger {
+  border-color: var(--hirevo-danger);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.timeline-dot.warning {
+  border-color: var(--hirevo-warning);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+/* =========================================================
+   AI RECOMMENDATION MATCH CARDS
+   ========================================================= */
+
+.ai-match-badge {
+  background: linear-gradient(135deg, #10b981, #047857);
+  color: white;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.progress-metric {
+  height: 6px;
+  border-radius: 10px;
+  background-color: #e2e8f0;
+}
+
+.progress-metric .progress-bar {
+  border-radius: 10px;
+}
+
+/* =========================================================
+   HERO BANNER
+   ========================================================= */
+
+.hirevo-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: white;
+  padding: 4.5rem 0 3.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hirevo-hero::after {
+  content: '';
+  position: absolute;
+  right: -10%;
+  top: -20%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.hirevo-footer {
+  background-color: #0f172a;
+  color: #94a3b8;
+  padding: 3.5rem 0 1.5rem;
+  margin-top: auto;
+  border-top: 1px solid #1e293b;
+}
+
+.hirevo-footer a {
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.hirevo-footer a:hover {
+  color: #10b981;
+}
+
+/* =========================================================
+   ROLE SELECTOR & AUTH TABS
+   ========================================================= */
+
+.role-selector-container {
+  position: relative;
+}
+
+.role-nav-pills {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.role-pill-btn {
+  font-size: 0.9rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+}
+
+.role-pill-btn:hover:not(.active-role-client):not(.active-role-freelancer) {
+  background-color: #e2e8f0;
+  color: var(--hirevo-primary) !important;
+}
+
+.role-pill-btn.active-role-client {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+}
+
+.role-pill-btn.active-role-freelancer {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+/* =========================================================
+   RESPONSIVE ADJUSTMENTS
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+  .dashboard-wrapper {
+    flex-direction: column;
+  }
+  .dashboard-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--hirevo-border);
+    padding: 1rem;
+  }
+  .dashboard-content {
+    padding: 1rem;
+  }
+}
+

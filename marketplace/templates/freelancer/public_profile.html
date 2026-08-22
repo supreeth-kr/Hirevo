@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ freelancer_user.full_name|default:freelancer_user.username }} - Freelancer Profile - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row g-4">
+    <!-- Left Column: User Card, Skills, Bio, Certificates -->
+    <div class="col-lg-4">
+      <div class="hirevo-card p-4 text-center mb-4">
+        <div class="mb-3 position-relative d-inline-block">
+          {% if profile.profile_picture %}
+            <img src="{{ profile.profile_picture.url }}" alt="{{ freelancer_user.username }}" class="rounded-circle border" style="width: 110px; height: 110px; object-fit: cover;">
+          {% else %}
+            <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-secondary fw-bold mx-auto" style="width: 110px; height: 110px; font-size: 2.5rem;">
+              {{ freelancer_user.username|slice:":1"|upper }}
+            </div>
+          {% endif %}
+          <span class="position-absolute bottom-0 end-0 badge rounded-pill {% if profile.availability == 'available' %}bg-success{% elif profile.availability == 'busy' %}bg-warning{% else %}bg-secondary{% endif %} p-2 border border-2 border-white">
+            <span class="visually-hidden">{{ profile.availability }}</span>
+          </span>
+        </div>
+
+        <h4 class="fw-bold mb-1">{{ freelancer_user.full_name|default:freelancer_user.username }}</h4>
+        <div class="text-muted small mb-2">@{{ freelancer_user.username }}</div>
+
+        <!-- Rating & Badges -->
+        <div class="d-flex justify-content-center align-items-center gap-1 text-warning mb-3">
+          <i class="bi bi-star-fill"></i>
+          <span class="fw-bold text-dark">{{ profile.avg_rating|default:"5.0" }}</span>
+          <span class="text-muted small">({{ profile.total_reviews }} reviews)</span>
+        </div>
+
+        <div class="badge bg-light text-dark border px-3 py-2 text-capitalize mb-3">
+          <i class="bi bi-circle-fill {% if profile.availability == 'available' %}text-success{% else %}text-warning{% endif %} me-1" style="font-size: 0.6rem;"></i>
+          {{ profile.get_availability_display }} for Work
+        </div>
+
+        <div class="d-grid gap-2 mb-3">
+          <a href="{% url 'messages_thread' freelancer_user.id %}" class="btn btn-hirevo">
+            <i class="bi bi-chat-dots me-1"></i> Contact Freelancer
+          </a>
+        </div>
+
+        <div class="pt-3 border-top text-start small">
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted"><i class="bi bi-cash me-1"></i> Hourly Rate:</span>
+            <span class="fw-bold">₹{{ profile.hourly_rate }}/hr</span>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted"><i class="bi bi-briefcase me-1"></i> Experience:</span>
+            <span class="fw-bold">{{ profile.experience_years }} Year{{ profile.experience_years|pluralize }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted"><i class="bi bi-geo-alt me-1"></i> Location:</span>
+            <span class="fw-bold">{{ profile.location|default:"Not specified" }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted"><i class="bi bi-translate me-1"></i> Languages:</span>
+            <span class="fw-bold">{{ profile.languages|default:"English" }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted"><i class="bi bi-check-circle me-1"></i> Completed:</span>
+            <span class="fw-bold text-success">{{ profile.completed_projects }} Projects</span>
+          </div>
+          {% if profile.website %}
+            <div class="d-flex justify-content-between py-1">
+              <span class="text-muted"><i class="bi bi-globe me-1"></i> Portfolio:</span>
+              <a href="{{ profile.website }}" target="_blank" class="fw-bold text-success text-truncate" style="max-width: 150px;">Link</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Skills Card -->
+      <div class="hirevo-card p-4 mb-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-tools me-1 text-success"></i> Skills & Expertise</h6>
+        <div class="d-flex flex-wrap gap-1">
+          {% for s in profile.skills.all %}
+            <span class="badge bg-light text-dark border px-2 py-1">{{ s.name }}</span>
+          {% empty %}
+            <span class="text-muted small">No specific skills listed yet.</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Certificates Card -->
+      {% if certificates %}
+        <div class="hirevo-card p-4 mb-4">
+          <h6 class="fw-bold mb-3"><i class="bi bi-award me-1 text-warning"></i> Verified Certificates</h6>
+          {% for cert in certificates %}
+            <div class="border-bottom pb-2 mb-2">
+              <div class="fw-bold small">{{ cert.name }}</div>
+              <div class="text-muted small">{{ cert.issuing_organization }} &bull; {{ cert.issue_date|date:"M Y" }}</div>
+              {% if cert.certificate_file %}
+                <a href="{{ cert.certificate_file.url }}" target="_blank" class="small text-success text-decoration-none">
+                  <i class="bi bi-file-earmark-check me-1"></i> View Certificate File
+                </a>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column: Bio, Gigs, Portfolio, Reviews -->
+    <div class="col-lg-8">
+      <!-- Bio -->
+      <div class="hirevo-card p-4 mb-4">
+        <h5 class="fw-bold mb-3">About Me</h5>
+        <div class="text-secondary lh-base" style="white-space: pre-line;">
+          {{ profile.bio|default:"Hello! I am a professional freelance specialist on Hirevo ready to build high-quality solutions for your projects." }}
+        </div>
+        {% if profile.education %}
+          <div class="mt-4 pt-3 border-top">
+            <h6 class="fw-bold mb-2"><i class="bi bi-mortarboard me-1 text-primary"></i> Education & Background</h6>
+            <p class="text-muted small mb-0" style="white-space: pre-line;">{{ profile.education }}</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Active Gigs by Freelancer -->
+      <div class="hirevo-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0">Services & Gigs ({{ gigs.count }})</h5>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 g-3">
+          {% for gig in gigs %}
+            <div class="col">
+              <div class="border rounded p-3 h-100 d-flex flex-column hover-shadow">
+                {% if gig.cover_image %}
+                  <img src="{{ gig.cover_image.url }}" class="rounded mb-2" style="height: 120px; object-fit: cover; width: 100%;">
+                {% endif %}
+                <h6 class="fw-bold mb-1">
+                  <a href="{% url 'gig_detail' gig.id %}" class="text-dark text-decoration-none">{{ gig.title }}</a>
+                </h6>
+                <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top small">
+                  <span class="text-muted">From <strong class="text-dark">₹{{ gig.starting_price }}</strong></span>
+                  <a href="{% url 'gig_detail' gig.id %}" class="btn btn-sm btn-outline-success">View</a>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="col-12 text-muted small">No active gigs listed.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Portfolio Gallery -->
+      {% if portfolios %}
+        <div class="hirevo-card p-4 mb-4">
+          <h5 class="fw-bold mb-3">Portfolio Highlights</h5>
+          <div class="row row-cols-1 row-cols-md-2 g-3">
+            {% for item in portfolios %}
+              <div class="col">
+                <div class="border rounded p-3 h-100">
+                  {% if item.image %}
+                    <img src="{{ item.image.url }}" class="img-fluid rounded mb-2" style="height: 140px; width: 100%; object-fit: cover;">
+                  {% endif %}
+                  <h6 class="fw-bold mb-1">{{ item.title }}</h6>
+                  <p class="text-muted small mb-2">{{ item.description|truncatewords:20 }}</p>
+                  {% if item.project_url %}
+                    <a href="{{ item.project_url }}" target="_blank" class="small text-success fw-bold text-decoration-none">
+                      <i class="bi bi-box-arrow-up-right me-1"></i> Live Project
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Reviews Received -->
+      <div class="hirevo-card p-4 mb-4">
+        <h5 class="fw-bold mb-3">Client Feedback & Ratings ({{ reviews.count }})</h5>
+        {% for rev in reviews %}
+          <div class="border-bottom pb-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-bold small">{{ rev.client.username }}</span>
+              <span class="small text-muted">{{ rev.created_at|date:"d M Y" }}</span>
+            </div>
+            <div class="text-warning small mb-1">
+              {% for i in "12345" %}
+                {% if forloop.counter <= rev.rating %}
+                  <i class="bi bi-star-fill"></i>
+                {% else %}
+                  <i class="bi bi-star"></i>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <p class="text-secondary small mb-0">{{ rev.comment }}</p>
+          </div>
+        {% empty %}
+          <p class="text-muted small mb-0">No reviews received yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

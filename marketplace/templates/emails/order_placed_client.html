@@ -1,0 +1,53 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+  <div style="text-align: center; margin-bottom: 24px;">
+    <div style="display: inline-block; padding: 6px 16px; border-radius: 20px; background: rgba(16, 185, 129, 0.15); color: #34d399; font-weight: 700; font-size: 12px; text-transform: uppercase; margin-bottom: 12px;">
+      Order Confirmed
+    </div>
+    <h2 style="color: #ffffff; margin: 0 0 8px 0; font-size: 20px; font-weight: 700;">Your Order Has Been Placed!</h2>
+    <p style="color: #94a3b8; margin: 0; font-size: 14px;">Your project has been assigned to the freelancer and is in progress.</p>
+  </div>
+
+  <p>Hello <strong>{{ user.full_name|default:user.username }}</strong>,</p>
+  <p>Thank you for choosing Hirevo! Your order has been placed with <strong>{{ counterpart.full_name|default:counterpart.username }}</strong>.</p>
+
+  <div class="info-card">
+    <table class="info-table">
+      <tr>
+        <td class="info-label">Order ID</td>
+        <td class="info-value"><span style="color: #10b981; font-family: monospace;">{{ order.order_id }}</span></td>
+      </tr>
+      <tr>
+        <td class="info-label">Gig / Service</td>
+        <td class="info-value">{{ order.gig.title }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Package Tier</td>
+        <td class="info-value">{{ order.package.name }} ({{ order.package.get_tier_display }})</td>
+      </tr>
+      <tr>
+        <td class="info-label">Amount Held in Escrow</td>
+        <td class="info-value">&#8377;{{ order.price }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Freelancer</td>
+        <td class="info-value">{{ counterpart.full_name|default:counterpart.username }}</td>
+      </tr>
+      <tr>
+        <td class="info-label">Estimated Delivery</td>
+        <td class="info-value" style="color: #38bdf8;">{{ order.deadline|date:"d M Y, h:i A"|default:"Within estimated delivery days" }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="text-align: center; margin: 24px 0;">
+    <a href="{{ project_url }}" class="btn-primary">Track Order Progress</a>
+  </div>
+
+  <div class="info-card" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2);">
+    <p style="margin: 0; font-size: 13px; color: #a7f3d0;">
+      <strong>Smart Continuity Guarantee:</strong> Hirevo's deadline watcher monitors this order 24/7. In the unlikely event of any delay, our platform automatically steps in with backup talent continuity!
+    </p>
+  </div>
+{% endblock %}

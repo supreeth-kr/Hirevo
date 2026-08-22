@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Assign Backup Freelancer - Order {{ order.order_id }} - Hirevo Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <a href="{% url 'admin_delayed_projects' %}" class="btn btn-sm btn-light border"><i class="bi bi-arrow-left"></i></a>
+        <h3 class="fw-bold mb-0">Assign Backup Freelancer</h3>
+        <span class="badge bg-danger">Order {{ order.order_id }}</span>
+      </div>
+      <p class="text-muted small mb-0">Select a qualified replacement talent to rescue this delayed project and guarantee completion.</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Delayed Project Summary Card -->
+    <div class="col-lg-4">
+      <div class="hirevo-card p-4 mb-4 border-start border-4 border-danger">
+        <h5 class="fw-bold text-danger mb-3"><i class="bi bi-exclamation-triangle-fill me-1"></i> Overdue Order Summary</h5>
+        
+        <div class="small">
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">Order ID:</span>
+            <strong class="text-dark">{{ order.order_id }}</strong>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">Gig Title:</span>
+            <span class="text-truncate text-dark fw-semibold" style="max-width: 170px;">{{ order.gig.title }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">Client:</span>
+            <strong class="text-dark">{{ order.client.username }}</strong>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">Primary Freelancer:</span>
+            <strong class="text-danger">{{ order.freelancer.username }}</strong>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">Order Value:</span>
+            <strong class="text-success fs-6">₹{{ order.price }}</strong>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">Missed Deadline:</span>
+            <strong class="text-danger">{{ order.deadline|date:"d M Y, H:i" }}</strong>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">5% Penalty Applied:</span>
+            <strong class="text-danger">₹{{ order.penalty.penalty_amount|default:"Calculated" }}</strong>
+          </div>
+        </div>
+
+        <div class="mt-3 p-3 bg-light rounded small">
+          <span class="fw-bold text-muted d-block mb-1">Required Gig Tags / Skills:</span>
+          <div class="d-flex flex-wrap gap-1">
+            {% for t in order.gig.tags_list %}
+              <span class="badge bg-white text-dark border">{{ t }}</span>
+            {% empty %}
+              <span class="text-muted">None specified</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Candidate Selection Form -->
+    <div class="col-lg-8">
+      <div class="hirevo-card p-4 p-md-5">
+        <h5 class="fw-bold mb-3">Qualified Backup Freelancer Candidates</h5>
+        <p class="text-muted small mb-4">Ranked by skillset compatibility with order requirements and historical customer ratings.</p>
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="d-flex flex-column gap-3 mb-4">
+            {% for cand in candidates %}
+              <label class="p-3 border rounded d-flex align-items-center gap-3 cursor-pointer hover-shadow bg-light bg-opacity-50" for="cand_{{ cand.user.id }}">
+                <input type="radio" name="backup_freelancer" value="{{ cand.user.id }}" id="cand_{{ cand.user.id }}" class="form-check-input" {% if forloop.first %}checked{% endif %} required>
+                
+                <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 44px; height: 44px;">
+                  {{ cand.user.username|slice:":1"|upper }}
+                </div>
+
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-baseline">
+                    <h6 class="fw-bold text-dark mb-0">{{ cand.user.full_name|default:cand.user.username }} (@{{ cand.user.username }})</h6>
+                    <span class="badge bg-success bg-opacity-10 text-success fw-bold">{{ cand.match_score }}% Match</span>
+                  </div>
+
+                  <div class="d-flex gap-3 small text-muted my-1">
+                    <span><i class="bi bi-star-fill text-warning"></i> {{ cand.profile.avg_rating|default:"5.0" }} ({{ cand.profile.total_reviews }} reviews)</span>
+                    <span><i class="bi bi-briefcase me-1"></i> {{ cand.profile.experience_years }} yrs exp</span>
+                    <span><i class="bi bi-cash me-1"></i> ₹{{ cand.profile.hourly_rate }}/hr</span>
+                    <span class="text-success text-capitalize"><i class="bi bi-circle-fill text-success me-1" style="font-size: 0.5rem;"></i> {{ cand.profile.availability }}</span>
+                  </div>
+
+                  {% if cand.skills %}
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                      {% for sk in cand.skills %}
+                        <span class="badge bg-white text-secondary border" style="font-size: 0.7rem;">{{ sk }}</span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              </label>
+            {% empty %}
+              <div class="text-center py-5 text-muted">
+                <i class="bi bi-people fs-1 d-block mb-2"></i>
+                No other active freelancers available to assign.
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold small">Assignment Reason & Instructions for Backup Specialist</label>
+            <textarea name="reason" class="form-control" rows="3" required>Primary freelancer missed project deadline. Administrator assigned you as backup specialist to continue delivery schedule.</textarea>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <a href="{% url 'admin_delayed_projects' %}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger btn-lg px-4 fw-bold">
+              <i class="bi bi-person-check-fill me-1"></i> Assign Backup Freelancer
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

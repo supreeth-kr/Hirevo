@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Hirevo Freelance Services Marketplace{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hirevo-hero">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-7 mb-4 mb-lg-0">
+        <h1 class="display-4 fw-extrabold text-white mb-3 lh-sm">
+          Find the right freelancer <br><span class="text-success">for your project</span>
+        </h1>
+        <p class="lead text-light text-opacity-75 mb-4">
+          Hire world-class freelance talent with clear project tracking and reliable delivery protection.
+        </p>
+
+        <!-- Search Form -->
+        <form action="{% url 'gig_list' %}" method="get" class="mb-4">
+          <div class="input-group input-group-lg shadow-lg rounded-3 overflow-hidden bg-white p-1">
+            <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted fs-5"></i></span>
+            <input type="text" name="q" class="form-control border-0 shadow-none ps-0" placeholder="Search for any service (e.g. Django, Machine Learning, Logo Design)...">
+            <button class="btn btn-hirevo px-4 fs-6" type="submit">Search Services</button>
+          </div>
+        </form>
+
+        <!-- Popular Tags / Pills -->
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <span class="text-light text-opacity-50 small fw-bold">Popular:</span>
+          <a href="{% url 'gig_list' %}?q=Django" class="badge bg-white bg-opacity-10 text-light text-decoration-none py-2 px-3 rounded-pill">Django</a>
+          <a href="{% url 'gig_list' %}?q=Python" class="badge bg-white bg-opacity-10 text-light text-decoration-none py-2 px-3 rounded-pill">Python</a>
+          <a href="{% url 'gig_list' %}?q=UI/UX" class="badge bg-white bg-opacity-10 text-light text-decoration-none py-2 px-3 rounded-pill">UI/UX Design</a>
+          <a href="{% url 'gig_list' %}?q=Machine+Learning" class="badge bg-white bg-opacity-10 text-light text-decoration-none py-2 px-3 rounded-pill">AI & Machine Learning</a>
+        </div>
+      </div>
+
+      <!-- Hero Visual Card -->
+      <div class="col-lg-5">
+        <div class="hirevo-card p-4 text-dark shadow-lg border-0" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge bg-success text-white px-3 py-1"><i class="bi bi-cpu-fill me-1"></i> AI Project Engine</span>
+            <span class="text-muted small">Live Platform Metrics</span>
+          </div>
+          <div class="row g-3 text-center mb-3">
+            <div class="col-4">
+              <div class="p-2 border rounded bg-light">
+                <div class="h4 fw-bold text-dark mb-0">{{ stats.total_gigs }}</div>
+                <div class="small text-muted">Active Gigs</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 border rounded bg-light">
+                <div class="h4 fw-bold text-success mb-0">{{ stats.total_freelancers }}</div>
+                <div class="small text-muted">Freelancers</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 border rounded bg-light">
+                <div class="h4 fw-bold text-primary mb-0">{{ stats.completed_orders }}</div>
+                <div class="small text-muted">Completed</div>
+              </div>
+            </div>
+          </div>
+          <div class="p-3 bg-light rounded border border-light-subtle small">
+            <div class="fw-bold text-dark mb-1"><i class="bi bi-shield-check text-success me-1"></i> Automatic Continuity Guarantee</div>
+            <div class="text-muted">Overdue projects are automatically detected and backed up by qualified administrators to guarantee delivery.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5 bg-white border-bottom">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="h3 fw-bold mb-1">Explore Popular Categories</h2>
+        <p class="text-muted mb-0">Browse specialized freelance services by domain</p>
+      </div>
+      <a href="{% url 'gig_list' %}" class="btn btn-hirevo-outline btn-sm">View All Categories <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+      {% for cat in categories %}
+        <div class="col">
+          <a href="{% url 'category_detail' cat.slug %}" class="hirevo-card p-3 text-center text-decoration-none d-block h-100 hirevo-card-hover">
+            <div class="stat-kpi-icon bg-light text-success mx-auto mb-2" style="width: 44px; height: 44px;">
+              <i class="bi {{ cat.icon }} fs-4"></i>
+            </div>
+            <h6 class="fw-bold text-dark mb-1 text-truncate">{{ cat.name }}</h6>
+            <span class="small text-muted">{{ cat.gigs.count }} Gigs</span>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Popular Gigs Showcase -->
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="h3 fw-bold mb-1">Featured & Popular Gigs</h2>
+        <p class="text-muted mb-0">Discover verified services offered by top talent</p>
+      </div>
+      <a href="{% url 'gig_list' %}" class="btn btn-hirevo-outline btn-sm">Browse All Gigs <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+      {% for gig in popular_gigs %}
+        <div class="col">
+          <div class="hirevo-card hirevo-card-hover h-100 d-flex flex-column">
+            <div class="gig-card-img-wrapper">
+              {% if gig.cover_image %}
+                <img src="{{ gig.cover_image.url }}" alt="{{ gig.title }}" class="gig-card-img">
+              {% else %}
+                <div class="w-100 h-100 bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center text-muted">
+                  <i class="bi bi-image fs-1"></i>
+                </div>
+              {% endif %}
+              {% if gig.category %}
+                <span class="gig-badge-category">{{ gig.category.name }}</span>
+              {% endif %}
+            </div>
+            <div class="p-3 d-flex flex-column flex-grow-1">
+              <!-- Freelancer Row -->
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 28px; height: 28px; font-size: 0.75rem;">
+                  {{ gig.freelancer.username|slice:":1"|upper }}
+                </div>
+                <a href="{% url 'freelancer_public_profile' gig.freelancer.id %}" class="text-dark fw-semibold small text-decoration-none text-truncate">
+                  {{ gig.freelancer.full_name|default:gig.freelancer.username }}
+                </a>
+              </div>
+
+              <!-- Gig Title -->
+              <h6 class="fw-bold mb-2 flex-grow-1">
+                <a href="{% url 'gig_detail' gig.id %}" class="text-dark text-decoration-none line-clamp-2">
+                  {{ gig.title }}
+                </a>
+              </h6>
+
+              <!-- Rating & Reviews -->
+              <div class="d-flex align-items-center gap-1 small text-muted mb-3">
+                <i class="bi bi-star-fill text-warning"></i>
+                <span class="fw-bold text-dark">{{ gig.avg_rating|default:"5.0" }}</span>
+                <span>({{ gig.total_reviews }} reviews)</span>
+              </div>
+
+              <!-- Price & Action Row -->
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
+                <div class="text-muted small">
+                  STARTING AT <span class="fw-bold fs-6 text-dark">₹{{ gig.starting_price }}</span>
+                </div>
+                <a href="{% url 'gig_detail' gig.id %}" class="btn btn-sm btn-outline-success">View Gig</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-12 text-center py-5">
+          <div class="text-muted mb-3"><i class="bi bi-inbox fs-1"></i></div>
+          <h5>No gigs currently published.</h5>
+          <p class="text-muted">Register as a freelancer to create the first service gig!</p>
+          <a href="{% url 'register' %}" class="btn btn-hirevo">Join as Freelancer</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- How Hirevo Works -->
+<section class="py-5 bg-white border-top border-bottom">
+  <div class="container">
+    <div class="text-center max-w-700 mx-auto mb-5">
+      <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-1 mb-2">Simple Workflow</span>
+      <h2 class="h2 fw-bold">How Hirevo Works</h2>
+      <p class="text-muted">From smart talent discovery to protected milestone completion</p>
+    </div>
+
+    <div class="row g-4 text-center">
+      <div class="col-md-3">
+        <div class="p-3">
+          <div class="stat-kpi-icon bg-success bg-opacity-10 text-success mx-auto mb-3" style="width: 60px; height: 60px;">
+            <i class="bi bi-search fs-3"></i>
+          </div>
+          <h5 class="fw-bold">1. Discover Talent</h5>
+          <p class="text-muted small">Search the marketplace to find the freelancer and service that fit your project.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3">
+          <div class="stat-kpi-icon bg-primary bg-opacity-10 text-primary mx-auto mb-3" style="width: 60px; height: 60px;">
+            <i class="bi bi-file-earmark-text fs-3"></i>
+          </div>
+          <h5 class="fw-bold">2. Place Order & Scope</h5>
+          <p class="text-muted small">Select your package (Basic, Standard, Premium), submit project requirements, and initiate simulated escrow payment.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3">
+          <div class="stat-kpi-icon bg-warning bg-opacity-10 text-warning mx-auto mb-3" style="width: 60px; height: 60px;">
+            <i class="bi bi-clock-history fs-3"></i>
+          </div>
+          <h5 class="fw-bold">3. Smart Delay Protection</h5>
+          <p class="text-muted small">Automatic deadline tracking detects overdue projects and administrators assign backup freelancers to ensure delivery.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3">
+          <div class="stat-kpi-icon bg-info bg-opacity-10 text-info mx-auto mb-3" style="width: 60px; height: 60px;">
+            <i class="bi bi-check2-circle fs-3"></i>
+          </div>
+          <h5 class="fw-bold">4. Approve & Review</h5>
+          <p class="text-muted small">Review deliverables, request revisions if needed, approve final completion, and rate your freelancer.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="py-5" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white;">
+  <div class="container text-center py-4">
+    <h2 class="h2 fw-bold text-white mb-3">Ready to bring your project to life?</h2>
+    <p class="lead text-light text-opacity-75 mb-4" style="max-width: 650px; margin: 0 auto;">
+      Join clients and freelancers collaborating with reliable project continuity.
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{% url 'register' %}" class="btn btn-hirevo btn-lg px-4">Get Started Now</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

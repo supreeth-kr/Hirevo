@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}My Reviews - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-primary bg-opacity-10 text-primary small">Client Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'client_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'client_orders' %}" class="sidebar-nav-item"><i class="bi bi-receipt"></i> My Orders</a>
+        <a href="{% url 'messages_inbox' %}" class="sidebar-nav-item"><i class="bi bi-chat-dots"></i> Messages</a>
+        <a href="{% url 'client_payments' %}" class="sidebar-nav-item"><i class="bi bi-credit-card"></i> Payment History</a>
+        <a href="{% url 'client_reviews' %}" class="sidebar-nav-item active"><i class="bi bi-star"></i> My Reviews</a>
+        <a href="{% url 'client_profile' %}" class="sidebar-nav-item"><i class="bi bi-person-gear"></i> Profile Settings</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <h3 class="fw-bold mb-1">Reviews Submitted by You</h3>
+      <p class="text-muted small mb-4">Feedback provided on completed freelance orders.</p>
+
+      <div class="hirevo-card p-4">
+        {% for r in reviews %}
+          <div class="border-bottom pb-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-bold text-dark">{{ r.gig.title }} (Order: {{ r.order.order_id }})</span>
+              <span class="text-muted small">{{ r.created_at|date:"d M Y" }}</span>
+            </div>
+            <div class="small text-muted mb-1">Freelancer: <strong>{{ r.freelancer.username }}</strong></div>
+            <div class="text-warning small mb-2">
+              {% for i in "12345" %}
+                {% if forloop.counter <= r.rating %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+              {% endfor %}
+              <span class="fw-bold text-dark ms-1">({{ r.rating }}/5 Stars)</span>
+            </div>
+            <p class="text-secondary small mb-0">{{ r.comment }}</p>
+          </div>
+        {% empty %}
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-star fs-1 d-block mb-2"></i>
+            No reviews submitted yet.
+          </div>
+        {% endfor %}
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

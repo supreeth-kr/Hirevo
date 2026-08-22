@@ -1,0 +1,68 @@
+{% extends 'partials/base.html' %}
+{% block title %} - Browse Gigs{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}">HIREVO</a></li>
+      {% if category %}<li class="breadcrumb-item active">{{ category|title }}</li>{% endif %}
+    </ol>
+  </nav>
+  <h1 class="fw-bold">{% if category %}{{ category|title }}{% else %}All Gigs{% endif %}</h1>
+  {% if category %}<p class="text-muted">Explore the boundaries of art and technology with Hirevo's {{ category }} artists</p>{% endif %}
+
+  <!-- Filters -->
+  <form method="get" class="row g-2 align-items-end mb-4 p-3 bg-light rounded">
+    <div class="col-md-4">
+      <input type="text" name="search" class="form-control" placeholder="Search gigs..." value="{{ search }}">
+    </div>
+    <div class="col-md-2">
+      <input type="number" name="min" class="form-control" placeholder="Min $" value="{{ request.GET.min }}">
+    </div>
+    <div class="col-md-2">
+      <input type="number" name="max" class="form-control" placeholder="Max $" value="{{ request.GET.max }}">
+    </div>
+    <div class="col-md-2">
+      <select name="sort" class="form-select">
+        <option value="sales" {% if request.GET.sort != 'createdAt' %}selected{% endif %}>Best Selling</option>
+        <option value="createdAt" {% if request.GET.sort == 'createdAt' %}selected{% endif %}>Newest</option>
+      </select>
+    </div>
+    <input type="hidden" name="category" value="{{ category }}">
+    <div class="col-md-2">
+      <button class="btn btn-success w-100">Apply</button>
+    </div>
+  </form>
+
+  <!-- Gig Cards -->
+  <div class="row g-4">
+    {% for gig in gigs %}
+    <div class="col-md-6 col-lg-4 col-xl-3">
+      <a href="{% url 'gig_detail' gig.pk %}" class="text-decoration-none text-dark">
+        <div class="card h-100 shadow-sm gig-card">
+          {% if gig.cover %}<img src="{{ gig.cover }}" class="card-img-top" style="height:180px;object-fit:cover">{% endif %}
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              {% if gig.seller.image %}<img src="{{ gig.seller.image }}" class="rounded-circle" width="28" height="28" style="object-fit:cover">{% endif %}
+              <small class="text-muted">{{ gig.seller.username }}</small>
+            </div>
+            <p class="card-text small fw-semibold">{{ gig.title }}</p>
+            <div class="d-flex align-items-center gap-1 mb-1">
+              <i class="bi bi-star-fill text-warning small"></i>
+              <small class="fw-bold">{{ gig.avg_rating }}</small>
+              <small class="text-muted">({{ gig.star_number }})</small>
+            </div>
+            <p class="mb-0 fw-bold text-success">From ${{ gig.price }}</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+      <i class="bi bi-search fs-1 text-muted"></i>
+      <p class="text-muted mt-2">No gigs found. Try different filters.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

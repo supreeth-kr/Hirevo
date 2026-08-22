@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}My Gigs - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-success bg-opacity-10 text-success small">Freelancer Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'freelancer_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'freelancer_gigs' %}" class="sidebar-nav-item active"><i class="bi bi-collection"></i> My Gigs</a>
+        <a href="{% url 'freelancer_gig_create' %}" class="sidebar-nav-item"><i class="bi bi-plus-square"></i> Create New Gig</a>
+        <a href="{% url 'freelancer_orders' %}" class="sidebar-nav-item"><i class="bi bi-list-task"></i> Orders</a>
+        <a href="{% url 'freelancer_portfolio' %}" class="sidebar-nav-item"><i class="bi bi-images"></i> Portfolio</a>
+        <a href="{% url 'freelancer_certificates' %}" class="sidebar-nav-item"><i class="bi bi-award"></i> Certificates</a>
+        <a href="{% url 'freelancer_profile' %}" class="sidebar-nav-item"><i class="bi bi-person-gear"></i> Profile Settings</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold mb-1">My Service Gigs</h3>
+          <p class="text-muted small mb-0">Manage published gigs, pricing packages, and availability.</p>
+        </div>
+        <a href="{% url 'freelancer_gig_create' %}" class="btn btn-hirevo btn-sm">
+          <i class="bi bi-plus-circle me-1"></i> Create New Gig
+        </a>
+      </div>
+
+      <div class="hirevo-card p-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>Gig</th>
+                <th>Category</th>
+                <th>Packages / Pricing</th>
+                <th>Rating</th>
+                <th>Orders</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody class="small">
+              {% for gig in gigs %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      {% if gig.cover_image %}
+                        <img src="{{ gig.cover_image.url }}" class="rounded" style="width: 44px; height: 36px; object-fit: cover;">
+                      {% endif %}
+                      <div>
+                        <a href="{% url 'gig_detail' gig.id %}" class="fw-bold text-dark text-decoration-none">
+                          {{ gig.title|truncatechars:40 }}
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-light text-dark border">{{ gig.category.name|default:"General" }}</span></td>
+                  <td>
+                    <div class="small">
+                      Starting at <strong class="text-success">₹{{ gig.starting_price }}</strong>
+                      <span class="text-muted">({{ gig.packages.count }} tiers)</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> {{ gig.avg_rating|default:"5.0" }}</span>
+                    <span class="text-muted">({{ gig.total_reviews }})</span>
+                  </td>
+                  <td><strong>{{ gig.orders.count }}</strong></td>
+                  <td>
+                    <span class="badge {% if gig.status == 'active' %}bg-success bg-opacity-10 text-success{% else %}bg-secondary bg-opacity-10 text-secondary{% endif %}">
+                      {{ gig.get_status_display }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <a href="{% url 'freelancer_gig_edit' gig.id %}" class="btn btn-sm btn-outline-secondary" title="Edit Gig">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      <a href="{% url 'freelancer_gig_toggle' gig.id %}" class="btn btn-sm {% if gig.status == 'active' %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="Toggle Active/Inactive">
+                        <i class="bi bi-power"></i>
+                      </a>
+                      <a href="{% url 'gig_detail' gig.id %}" class="btn btn-sm btn-outline-primary" title="View Gig" target="_blank">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-5 text-muted">
+                    <i class="bi bi-collection fs-1 d-block mb-2"></i>
+                    You haven't created any service gigs yet.
+                    <div class="mt-2">
+                      <a href="{% url 'freelancer_gig_create' %}" class="btn btn-hirevo btn-sm">Create Your First Gig</a>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Chat with {{ contact.username }} - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="hirevo-card max-w-800 mx-auto overflow-hidden d-flex flex-column" style="height: calc(100vh - 180px); min-height: 500px;">
+    <!-- Chat Header -->
+    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3">
+        <a href="{% url 'messages_inbox' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+        <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 40px; height: 40px;">
+          {{ contact.username|slice:":1"|upper }}
+        </div>
+        <div>
+          <div class="fw-bold text-dark mb-0">{{ contact.full_name|default:contact.username }}</div>
+          <span class="badge {% if contact.role == 'freelancer' %}bg-success{% elif contact.role == 'client' %}bg-primary{% else %}bg-danger{% endif %} text-capitalize" style="font-size: 0.65rem;">
+            {{ contact.role }}
+          </span>
+        </div>
+      </div>
+
+      {% if contact.role == 'freelancer' %}
+        <a href="{% url 'freelancer_public_profile' contact.id %}" target="_blank" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-person me-1"></i> Profile
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Messages Chat History Window -->
+    <div class="p-4 flex-grow-1 overflow-y-auto d-flex flex-column gap-3 bg-white" id="chatBox">
+      {% for msg in messages_list %}
+        <div class="d-flex {% if msg.sender == user %}justify-content-end{% else %}justify-content-start{% endif %}">
+          <div class="p-3 rounded-3 shadow-sm" style="max-width: 75%; {% if msg.sender == user %}background-color: var(--hirevo-accent); color: white; border-bottom-right-radius: 2px !important;{% else %}background-color: #f1f5f9; color: var(--hirevo-text-main); border-bottom-left-radius: 2px !important;{% endif %}">
+            <div class="small lh-base mb-1" style="white-space: pre-line;">{{ msg.content }}</div>
+            <div class="text-end" style="font-size: 0.68rem; opacity: 0.85;">
+              {{ msg.created_at|date:"H:i, d M" }}
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="text-center my-auto text-muted small">
+          <i class="bi bi-chat-heart fs-1 d-block mb-2 text-success"></i>
+          This is the start of your direct communication with <strong>{{ contact.username }}</strong>.
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Send Message Form -->
+    <div class="p-3 bg-light border-top">
+      <form method="post" class="d-flex gap-2">
+        {% csrf_token %}
+        {{ form.content }}
+        <button type="submit" class="btn btn-hirevo px-4 fw-bold">
+          <i class="bi bi-send-fill"></i>
+        </button>
+      </form>
+      {% if form.content.errors %}
+        <div class="text-danger small mt-2">{{ form.content.errors|striptags }}</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Auto-scroll to bottom of chat
+  const chatBox = document.getElementById('chatBox');
+  if (chatBox) {
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+</script>
+{% endblock %}

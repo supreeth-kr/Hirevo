@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Freelancer Orders - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-success bg-opacity-10 text-success small">Freelancer Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'freelancer_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'freelancer_gigs' %}" class="sidebar-nav-item"><i class="bi bi-collection"></i> My Gigs</a>
+        <a href="{% url 'freelancer_orders' %}" class="sidebar-nav-item active"><i class="bi bi-list-task"></i> Orders & Projects</a>
+        <a href="{% url 'freelancer_backup_assignments' %}" class="sidebar-nav-item"><i class="bi bi-shield-check text-info"></i> Backup Assignments</a>
+        <a href="{% url 'freelancer_earnings' %}" class="sidebar-nav-item"><i class="bi bi-wallet2"></i> Earnings & Penalties</a>
+        <a href="{% url 'freelancer_profile' %}" class="sidebar-nav-item"><i class="bi bi-person-gear"></i> Profile Settings</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold mb-1">Assigned Client Orders</h3>
+          <p class="text-muted small mb-0">Accept incoming orders, upload deliverables, and manage milestone deadlines.</p>
+        </div>
+      </div>
+
+      <!-- Filter Badges -->
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="{% url 'freelancer_orders' %}" class="btn btn-sm {% if not status_filter %}btn-dark{% else %}btn-outline-secondary{% endif %}">All Orders</a>
+        <a href="{% url 'freelancer_orders' %}?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Pending Acceptance</a>
+        <a href="{% url 'freelancer_orders' %}?status=in_progress" class="btn btn-sm {% if status_filter == 'in_progress' %}btn-dark{% else %}btn-outline-secondary{% endif %}">In Progress</a>
+        <a href="{% url 'freelancer_orders' %}?status=submitted" class="btn btn-sm {% if status_filter == 'submitted' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Submitted</a>
+        <a href="{% url 'freelancer_orders' %}?status=revision_requested" class="btn btn-sm {% if status_filter == 'revision_requested' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Revisions</a>
+        <a href="{% url 'freelancer_orders' %}?status=completed" class="btn btn-sm {% if status_filter == 'completed' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Completed</a>
+        <a href="{% url 'freelancer_orders' %}?status=delayed" class="btn btn-sm {% if status_filter == 'delayed' %}btn-danger text-white{% else %}btn-outline-danger{% endif %}">Delayed</a>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="hirevo-card p-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>Order ID</th>
+                <th>Client</th>
+                <th>Service / Package</th>
+                <th>Amount</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody class="small">
+              {% for order in page_obj %}
+                <tr>
+                  <td class="fw-bold text-primary">{{ order.order_id }}</td>
+                  <td class="fw-semibold">{{ order.client.username }}</td>
+                  <td class="text-truncate" style="max-width: 200px;">
+                    <div>{{ order.gig.title }}</div>
+                    <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">{{ order.package.name }}</span>
+                  </td>
+                  <td class="fw-bold text-success">₹{{ order.price }}</td>
+                  <td class="text-muted">
+                    <span class="{% if order.is_overdue %}text-danger fw-bold{% endif %}">
+                      {{ order.deadline|date:"d M Y, H:i"|default:"TBD" }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge-status {{ order.status }}">{{ order.get_status_display }}</span>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <a href="{% url 'messages_thread' order.client.id %}" class="btn btn-sm btn-outline-success" title="Message {{ order.client.username }}">
+                        <i class="bi bi-chat-dots"></i><span class="visually-hidden">Message client</span>
+                      </a>
+                      <a href="{% url 'freelancer_order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+                        Manage &rarr;
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                    No orders matching this filter.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+          <nav class="mt-4">
+            <ul class="pagination pagination-sm justify-content-center">
+              {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">Previous</a></li>
+              {% endif %}
+              <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+              {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">Next</a></li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

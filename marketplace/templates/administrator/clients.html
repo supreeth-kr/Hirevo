@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Client Accounts - Hirevo Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-danger bg-opacity-10 text-danger small">Admin Portal</span>
+      </div>
+      <nav class="d-flex flex-column">
+        <a href="{% url 'admin_dashboard' %}" class="sidebar-nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'admin_delayed_projects' %}" class="sidebar-nav-item"><i class="bi bi-exclamation-octagon text-danger"></i> Delayed Projects</a>
+        <a href="{% url 'admin_backup_assignments' %}" class="sidebar-nav-item"><i class="bi bi-shield-check text-info"></i> Backup Assignments</a>
+        <a href="{% url 'admin_penalties' %}" class="sidebar-nav-item"><i class="bi bi-percent text-warning"></i> Penalties (5%)</a>
+        <a href="{% url 'admin_orders' %}" class="sidebar-nav-item"><i class="bi bi-receipt"></i> Orders Monitor</a>
+        <a href="{% url 'admin_users' %}" class="sidebar-nav-item"><i class="bi bi-people"></i> All Users</a>
+        <a href="{% url 'admin_freelancers' %}" class="sidebar-nav-item"><i class="bi bi-laptop"></i> Freelancers</a>
+        <a href="{% url 'admin_clients' %}" class="sidebar-nav-item active"><i class="bi bi-briefcase"></i> Clients</a>
+        <a href="{% url 'admin_gigs' %}" class="sidebar-nav-item"><i class="bi bi-collection"></i> Marketplace Gigs</a>
+        <a href="{% url 'admin_categories' %}" class="sidebar-nav-item"><i class="bi bi-tags"></i> Categories</a>
+        <a href="{% url 'admin_payments' %}" class="sidebar-nav-item"><i class="bi bi-credit-card"></i> Payments</a>
+        <a href="{% url 'admin_reviews' %}" class="sidebar-nav-item"><i class="bi bi-star"></i> Reviews Moderation</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <h3 class="fw-bold mb-1">Client Accounts</h3>
+      <p class="text-muted small mb-4">Buyers and businesses hiring freelance services on Hirevo.</p>
+
+      <div class="hirevo-card p-4">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>Client Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Location</th>
+                <th>Orders Placed</th>
+                <th>Joined Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody class="small">
+              {% for c in page_obj %}
+                <tr>
+                  <td class="fw-bold">{{ c.full_name|default:c.username }}</td>
+                  <td>@{{ c.username }}</td>
+                  <td>{{ c.email }}</td>
+                  <td class="text-muted">{{ c.client_profile.location|default:"-" }}</td>
+                  <td><span class="badge bg-light text-dark border">{{ c.client_orders.count }}</span></td>
+                  <td class="text-muted">{{ c.date_joined|date:"d M Y" }}</td>
+                  <td>
+                    <span class="badge {% if c.is_active %}bg-success bg-opacity-10 text-success{% else %}bg-danger bg-opacity-10 text-danger{% endif %}">
+                      {% if c.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                  </td>
+                  <td>
+                    <a href="{% url 'admin_user_toggle' c.id %}" class="btn btn-sm btn-outline-secondary">
+                      Toggle
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="8" class="text-center py-4 text-muted">No client accounts registered.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

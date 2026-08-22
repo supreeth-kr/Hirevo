@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Client Dashboard - Hirevo{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+      <div class="px-3 pb-3 mb-3 border-bottom">
+        <div class="fw-bold fs-6 text-dark">{{ user.full_name|default:user.username }}</div>
+        <span class="badge bg-primary bg-opacity-10 text-primary small">Client Portal</span>
+      </div>
+
+      <nav class="d-flex flex-column">
+        <a href="{% url 'client_dashboard' %}" class="sidebar-nav-item active">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a href="{% url 'gig_list' %}" class="sidebar-nav-item">
+          <i class="bi bi-search"></i> Explore Gigs
+        </a>
+        <a href="{% url 'client_orders' %}" class="sidebar-nav-item">
+          <i class="bi bi-receipt"></i> My Orders
+        </a>
+        <a href="{% url 'messages_inbox' %}" class="sidebar-nav-item">
+          <i class="bi bi-chat-dots"></i> Messages
+        </a>
+        <a href="{% url 'client_payments' %}" class="sidebar-nav-item">
+          <i class="bi bi-credit-card"></i> Payment History
+        </a>
+        <a href="{% url 'client_reviews' %}" class="sidebar-nav-item">
+          <i class="bi bi-star"></i> My Reviews
+        </a>
+        <a href="{% url 'client_profile' %}" class="sidebar-nav-item">
+          <i class="bi bi-person-gear"></i> Profile Settings
+        </a>
+        <a href="{% url 'logout' %}" class="sidebar-nav-item text-danger mt-3">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Dashboard Content -->
+    <main class="dashboard-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="h3 fw-bold mb-1">Welcome, {{ user.full_name|default:user.username }}!</h2>
+          <p class="text-muted small mb-0">Manage your freelance orders, escrow simulation, and deliveries.</p>
+        </div>
+        <a href="{% url 'gig_list' %}" class="btn btn-hirevo btn-sm">
+          <i class="bi bi-plus-circle me-1"></i> Hire Talent
+        </a>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="stat-kpi-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-semibold">Total Orders</div>
+                <div class="h3 fw-bold mb-0">{{ total_orders }}</div>
+              </div>
+              <div class="stat-kpi-icon bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-receipt"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-kpi-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-semibold">Active Projects</div>
+                <div class="h3 fw-bold text-indigo mb-0">{{ active_orders }}</div>
+              </div>
+              <div class="stat-kpi-icon bg-indigo bg-opacity-10 text-indigo">
+                <i class="bi bi-gear-wide-connected"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-kpi-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-semibold">Completed</div>
+                <div class="h3 fw-bold text-success mb-0">{{ completed_orders }}</div>
+              </div>
+              <div class="stat-kpi-icon bg-success bg-opacity-10 text-success">
+                <i class="bi bi-check2-circle"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-kpi-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-semibold">Pending Action</div>
+                <div class="h3 fw-bold text-warning mb-0">{{ pending_orders }}</div>
+              </div>
+              <div class="stat-kpi-icon bg-warning bg-opacity-10 text-warning">
+                <i class="bi bi-hourglass-split"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Orders & Notifications -->
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="hirevo-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Recent Orders</h5>
+              <a href="{% url 'client_orders' %}" class="small text-decoration-none text-success fw-semibold">View All</a>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Gig / Service</th>
+                    <th>Freelancer</th>
+                    <th>Price</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody class="small">
+                  {% for order in recent_orders %}
+                    <tr>
+                      <td class="fw-bold text-primary">{{ order.order_id }}</td>
+                      <td class="text-truncate" style="max-width: 180px;">{{ order.gig.title }}</td>
+                      <td>
+                        <a href="{% url 'freelancer_public_profile' order.freelancer.id %}" class="text-dark fw-semibold text-decoration-none">
+                          {{ order.freelancer.username }}
+                        </a>
+                      </td>
+                      <td class="fw-bold">₹{{ order.price }}</td>
+                      <td class="text-muted">{{ order.deadline|date:"d M Y"|default:"TBD" }}</td>
+                      <td>
+                        <span class="badge-status {{ order.status }}">{{ order.get_status_display }}</span>
+                      </td>
+                      <td>
+                        <a href="{% url 'client_order_detail' order.id %}" class="btn btn-sm btn-outline-secondary">
+                          View
+                        </a>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="7" class="text-center py-4 text-muted">
+                        No orders placed yet. <a href="{% url 'gig_list' %}">Browse marketplace</a> to hire freelancers.
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications Column -->
+        <div class="col-lg-4">
+          <div class="hirevo-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Recent Notifications</h5>
+              <a href="{% url 'notifications_list' %}" class="small text-decoration-none text-muted">All</a>
+            </div>
+
+            <div class="d-flex flex-column gap-3">
+              {% for notif in notifications %}
+                <div class="p-2 rounded {% if not notif.is_read %}bg-light border-start border-3 border-success{% else %}border{% endif %} small">
+                  <div class="fw-bold text-dark">{{ notif.title }}</div>
+                  <div class="text-muted small text-truncate">{{ notif.message }}</div>
+                  <div class="d-flex justify-content-between align-items-center mt-1">
+                    <span class="text-muted" style="font-size: 0.7rem;">{{ notif.created_at|date:"d M, H:i" }}</span>
+                    {% if notif.link %}
+                      <a href="{% url 'notification_mark_read' notif.id %}" class="small text-success text-decoration-none">View &rarr;</a>
+                    {% endif %}
+                  </div>
+                </div>
+              {% empty %}
+                <div class="text-muted small text-center py-4">No notifications yet.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
