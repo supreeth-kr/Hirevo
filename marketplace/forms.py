@@ -26,6 +26,8 @@ class BootstrapMixin:
 class RegisterForm(BootstrapMixin, UserCreationForm):
     full_name = forms.CharField(max_length=200, required=True, label='Full Name')
     email = forms.EmailField(required=True, label='Email Address')
+    mobile_number = forms.CharField(max_length=15, required=True, label='Mobile Number')
+    address = forms.CharField(widget=forms.Textarea(attrs={'rows': 2, 'placeholder': 'Full Address'}), required=True, label='Address')
     role = forms.ChoiceField(
         choices=[(User.ROLE_CLIENT, 'Client (Hire talent)'), (User.ROLE_FREELANCER, 'Freelancer (Offer services)')],
         widget=forms.RadioSelect(attrs={'class': 'btn-check'}),
@@ -35,7 +37,7 @@ class RegisterForm(BootstrapMixin, UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['full_name', 'username', 'email', 'role']
+        fields = ['full_name', 'username', 'email', 'mobile_number', 'address', 'role']
 
     def clean_email(self):
         email = self.cleaned_data.get('email', '').strip().lower()
@@ -43,10 +45,16 @@ class RegisterForm(BootstrapMixin, UserCreationForm):
             raise forms.ValidationError("An account with this email address already exists. Please sign in.")
         return email
 
+    def clean(self):
+        cleaned_data = super().clean()
+        return cleaned_data
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.full_name = self.cleaned_data['full_name']
         user.email = self.cleaned_data['email']
+        user.mobile_number = self.cleaned_data.get('mobile_number', '')
+        user.address = self.cleaned_data.get('address', '')
         user.role = self.cleaned_data['role']
         # A registration is verified only after its OTP is successfully confirmed.
         user.is_email_verified = False
@@ -65,8 +73,8 @@ class OTPVerificationForm(BootstrapMixin, forms.Form):
         min_length=6,
         required=True,
         label='Enter 6-Digit OTP Code',
-        widget=forms.TextInput(attrs={
-            'placeholder': '123456',
+        widget=forms.PasswordInput(attrs={
+            'placeholder': '••••••',
             'autocomplete': 'one-time-code',
             'class': 'form-control text-center fw-bold fs-3 tracking-widest',
             'maxlength': '6',
@@ -187,32 +195,35 @@ class RevisionForm(BootstrapMixin, forms.ModelForm):
 
 
 class FreelancerVerificationForm(BootstrapMixin, forms.ModelForm):
+    selfie_data = forms.CharField(widget=forms.HiddenInput(), required=True)
     consent = forms.BooleanField(
         required=True,
-        label='I confirm this is my valid government ID and a live photo of me.'
+        label='I confirm this is my valid document and live photo.'
     )
 
     class Meta:
         model = FreelancerVerification
-        fields = ['document_type', 'document_file', 'selfie_image']
+        fields = ['document_type', 'document_file']
         widgets = {
             'document_file': forms.FileInput(attrs={'accept': '.pdf,.jpg,.jpeg,.png'}),
-            'selfie_image': forms.FileInput(attrs={'accept': 'image/*', 'capture': 'user'}),
         }
 
-    def clean_document_file(self):
-        uploaded = self.cleaned_data['document_file']
-        if uploaded.size > 10 * 1024 * 1024:
-            raise forms.ValidationError('Government ID file must be 10 MB or smaller.')
-        allowed = {'.pdf', '.jpg', '.jpeg', '.png'}
-        if not any(uploaded.name.lower().endswith(ext) for ext in allowed):
-            raise forms.ValidationError('Upload a PDF, JPG, or PNG government ID.')
-        return uploaded
+    def clean_selfie_data(self):
+        data = self.cleaned_data.get('selfie_data')
+        if not data or not data.startswith('data:image/'):
+            raise forms.ValidationError("Please capture a live photo.")
+        return data
 
-    def clean_selfie_image(self):
-        uploaded = self.cleaned_data['selfie_image']
-        if uploaded.size > 5 * 1024 * 1024:
-            raise forms.ValidationError('Selfie image must be 5 MB or smaller.')
+    def clean_document_file(self):
+        uploaded = self.cleaned_data.get('document_file')
+        if not uploaded:
+            raise forms.ValidationError('Please upload your government document.')
+        if uploaded:
+            if uploaded.size > 10 * 1024 * 1024:
+                raise forms.ValidationError('Government ID file must be 10 MB or smaller.')
+            allowed = {'.pdf', '.jpg', '.jpeg', '.png'}
+            if not any(uploaded.name.lower().endswith(ext) for ext in allowed):
+                raise forms.ValidationError('Upload a PDF, JPG, or PNG government ID.')
         return uploaded
 
 

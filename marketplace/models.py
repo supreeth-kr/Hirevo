@@ -14,6 +14,8 @@ class User(AbstractUser):
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_CLIENT)
     full_name = models.CharField(max_length=200, blank=True)
+    mobile_number = models.CharField(max_length=15, blank=True)
+    address = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     is_email_verified = models.BooleanField(default=False)
 
@@ -110,9 +112,9 @@ class FreelancerVerification(models.Model):
         (DOCUMENT_DRIVING_LICENSE, 'Driving licence'),
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='verification')
-    document_type = models.CharField(max_length=30, choices=DOCUMENT_CHOICES)
-    document_file = models.FileField(upload_to='verification_documents/')
-    selfie_image = models.ImageField(upload_to='verification_selfies/')
+    document_type = models.CharField(max_length=30, choices=DOCUMENT_CHOICES, blank=True, null=True)
+    document_file = models.FileField(upload_to='verification_documents/', blank=True, null=True)
+    selfie_image = models.ImageField(upload_to='verification_selfies/', blank=True, null=True)
     liveness_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     reviewer_notes = models.TextField(blank=True)

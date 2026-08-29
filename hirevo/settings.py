@@ -128,3 +128,8 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Hirevo Platform <notifications@hirevo.com>')
 SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
+
+# Cashfree API Credentials for Aadhaar Verification
+CASHFREE_CLIENT_ID = os.getenv('CASHFREE_CLIENT_ID', 'placeholder_client_id')
+CASHFREE_CLIENT_SECRET = os.getenv('CASHFREE_CLIENT_SECRET', 'placeholder_client_secret')
+CASHFREE_ENV = os.getenv('CASHFREE_ENV', 'TEST') # Set to PROD for real verification

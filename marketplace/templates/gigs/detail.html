@@ -106,11 +106,13 @@
               <span><i class="bi bi-geo-alt me-1"></i> {{ freelancer_profile.location|default:"Global" }}</span>
             </div>
           </div>
+          {% if not user.is_authenticated or user.role == 'client' %}
           <div class="col-auto">
             <a href="{% url 'messages_thread' gig.freelancer.id %}" class="btn btn-hirevo-outline btn-sm">
               <i class="bi bi-chat-dots me-1"></i> Contact Seller
             </a>
           </div>
+          {% endif %}
         </div>
 
         {% if freelancer_profile.skills.all %}
@@ -208,9 +210,11 @@
                 </ul>
               {% endif %}
 
+              {% if not user.is_authenticated or user.role == 'client' %}
               <a href="{% url 'place_order' gig.id 'basic' %}" class="btn btn-hirevo w-100 py-2 fw-bold">
                 Order Now (₹{{ basic_pkg.price }})
               </a>
+              {% endif %}
             </div>
           {% endif %}
 
@@ -235,9 +239,11 @@
                 </ul>
               {% endif %}
 
+              {% if not user.is_authenticated or user.role == 'client' %}
               <a href="{% url 'place_order' gig.id 'standard' %}" class="btn btn-hirevo w-100 py-2 fw-bold">
                 Order Now (₹{{ standard_pkg.price }})
               </a>
+              {% endif %}
             </div>
           {% endif %}
 
@@ -262,18 +268,22 @@
                 </ul>
               {% endif %}
 
+              {% if not user.is_authenticated or user.role == 'client' %}
               <a href="{% url 'place_order' gig.id 'premium' %}" class="btn btn-hirevo w-100 py-2 fw-bold">
                 Order Now (₹{{ premium_pkg.price }})
               </a>
+              {% endif %}
             </div>
           {% endif %}
         </div>
 
+        {% if not user.is_authenticated or user.role == 'client' %}
         <div class="p-3 bg-light border-top text-center">
           <a href="{% url 'messages_thread' gig.freelancer.id %}" class="small text-muted text-decoration-none">
             <i class="bi bi-chat-left-text me-1"></i> Have custom questions? Message Seller
           </a>
         </div>
+        {% endif %}
       </div>
     </div>
   </div>

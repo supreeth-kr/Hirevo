@@ -8,7 +8,7 @@
 <section class="hirevo-hero">
   <div class="container">
     <div class="row align-items-center">
-      <div class="col-lg-7 mb-4 mb-lg-0">
+      <div class="col-lg-10 mx-auto text-center mb-4 mb-lg-0">
         <h1 class="display-4 fw-extrabold text-white mb-3 lh-sm">
           Find the right freelancer <br><span class="text-success">for your project</span>
         </h1>
@@ -26,46 +26,12 @@
         </form>
 
         <!-- Popular Tags / Pills -->
-        <div class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
           <span class="text-light text-opacity-50 small fw-bold">Popular:</span>
           <a href="{% url 'gig_list' %}?q=Django" class="badge bg-white bg-opacity-10 text-light text-decoration-none py-2 px-3 rounded-pill">Django</a>
           <a href="{% url 'gig_list' %}?q=Python" class="badge bg-white bg-opacity-10 text-light text-decoration-none py-2 px-3 rounded-pill">Python</a>
           <a href="{% url 'gig_list' %}?q=UI/UX" class="badge bg-white bg-opacity-10 text-light text-decoration-none py-2 px-3 rounded-pill">UI/UX Design</a>
           <a href="{% url 'gig_list' %}?q=Machine+Learning" class="badge bg-white bg-opacity-10 text-light text-decoration-none py-2 px-3 rounded-pill">AI & Machine Learning</a>
-        </div>
-      </div>
-
-      <!-- Hero Visual Card -->
-      <div class="col-lg-5">
-        <div class="hirevo-card p-4 text-dark shadow-lg border-0" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="badge bg-success text-white px-3 py-1"><i class="bi bi-cpu-fill me-1"></i> AI Project Engine</span>
-            <span class="text-muted small">Live Platform Metrics</span>
-          </div>
-          <div class="row g-3 text-center mb-3">
-            <div class="col-4">
-              <div class="p-2 border rounded bg-light">
-                <div class="h4 fw-bold text-dark mb-0">{{ stats.total_gigs }}</div>
-                <div class="small text-muted">Active Gigs</div>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="p-2 border rounded bg-light">
-                <div class="h4 fw-bold text-success mb-0">{{ stats.total_freelancers }}</div>
-                <div class="small text-muted">Freelancers</div>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="p-2 border rounded bg-light">
-                <div class="h4 fw-bold text-primary mb-0">{{ stats.completed_orders }}</div>
-                <div class="small text-muted">Completed</div>
-              </div>
-            </div>
-          </div>
-          <div class="p-3 bg-light rounded border border-light-subtle small">
-            <div class="fw-bold text-dark mb-1"><i class="bi bi-shield-check text-success me-1"></i> Automatic Continuity Guarantee</div>
-            <div class="text-muted">Overdue projects are automatically detected and backed up by qualified administrators to guarantee delivery.</div>
-          </div>
         </div>
       </div>
     </div>
@@ -91,7 +57,6 @@
               <i class="bi {{ cat.icon }} fs-4"></i>
             </div>
             <h6 class="fw-bold text-dark mb-1 text-truncate">{{ cat.name }}</h6>
-            <span class="small text-muted">{{ cat.gigs.count }} Gigs</span>
           </a>
         </div>
       {% endfor %}

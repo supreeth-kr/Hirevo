@@ -185,3 +185,101 @@ def calculate_freelancer_earnings(freelancer):
         'net_earnings': net_earnings,
         'completed_count': paid_payments.count(),
     }
+
+
+class GovernmentIDVerificationService:
+    """
+    Mock service to simulate checking an Aadhaar number against a government database API via OTP.
+    """
+    
+    @staticmethod
+    def verify_aadhaar(aadhaar_number, otp_code, user):
+        """
+        Simulate an Aadhaar API validation call.
+        Returns a dictionary with 'is_valid' boolean and a 'message'.
+        """
+        import time
+        
+        # Simulate network latency
+        time.sleep(1.0)
+        
+        if otp_code == '123456':
+            return {
+                'is_valid': True,
+                'status': 'approved',
+                'message': f'Successfully verified Aadhaar number {aadhaar_number} with government records.'
+            }
+        else:
+            return {
+                'is_valid': False,
+                'status': 'pending',
+                'message': f'Invalid OTP or automated check failed. Flagged for manual review.'
+            }
+
+class CashfreeAadhaarService:
+    """
+    Service for interacting with Cashfree Verification Suite for Aadhaar KYC.
+    Uses placeholders from settings if credentials are not configured.
+    """
+    
+    @staticmethod
+    def _get_headers():
+        from django.conf import settings
+        return {
+            'x-client-id': settings.CASHFREE_CLIENT_ID,
+            'x-client-secret': settings.CASHFREE_CLIENT_SECRET,
+            'Content-Type': 'application/json'
+        }
+        
+    @staticmethod
+    def _get_base_url():
+        from django.conf import settings
+        if getattr(settings, 'CASHFREE_ENV', 'TEST') == 'PROD':
+            return 'https://api.cashfree.com/verification'
+        return 'https://sandbox.cashfree.com/verification'
+
+    @staticmethod
+    def send_otp(aadhaar_number):
+        import requests
+        from django.conf import settings
+        
+        # If placeholders are used, simulate the response so the UI still works
+        if settings.CASHFREE_CLIENT_ID == 'placeholder_client_id':
+            import time
+            time.sleep(1)
+            return {'success': True, 'ref_id': 'mock_ref_12345'}
+
+        url = f"{CashfreeAadhaarService._get_base_url()}/offline-aadhaar/otp"
+        payload = {"aadhaar_number": aadhaar_number}
+        try:
+            response = requests.post(url, json=payload, headers=CashfreeAadhaarService._get_headers())
+            data = response.json()
+            if response.status_code == 200 and data.get('status') == 'SUCCESS':
+                return {'success': True, 'ref_id': data.get('ref_id')}
+            return {'success': False, 'message': data.get('message', 'Failed to send OTP')}
+        except Exception as e:
+            return {'success': False, 'message': str(e)}
+
+    @staticmethod
+    def verify_otp(ref_id, otp):
+        import requests
+        from django.conf import settings
+        
+        # If placeholders are used, simulate the verification
+        if settings.CASHFREE_CLIENT_ID == 'placeholder_client_id':
+            import time
+            time.sleep(1)
+            if otp == '123456':
+                return {'success': True, 'message': 'Mock OTP Verified'}
+            return {'success': False, 'message': 'Invalid Mock OTP'}
+
+        url = f"{CashfreeAadhaarService._get_base_url()}/offline-aadhaar/verify"
+        payload = {"ref_id": ref_id, "otp": otp}
+        try:
+            response = requests.post(url, json=payload, headers=CashfreeAadhaarService._get_headers())
+            data = response.json()
+            if response.status_code == 200 and data.get('status') == 'VALID':
+                return {'success': True, 'message': 'Aadhaar Verified', 'data': data}
+            return {'success': False, 'message': data.get('message', 'Invalid OTP')}
+        except Exception as e:
+            return {'success': False, 'message': str(e)}

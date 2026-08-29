@@ -8,45 +8,102 @@
     {% if verification %}<div class="alert {% if verification.status == 'approved' %}alert-success{% elif verification.status == 'rejected' %}alert-danger{% else %}alert-warning{% endif %}">
       Status: <strong>{{ verification.get_status_display }}</strong>. Liveness check: <strong>{{ verification.get_liveness_status_display }}</strong>. {{ verification.reviewer_notes }}
     </div>{% endif %}
-    <form method="post" enctype="multipart/form-data">{% csrf_token %}
-      <div class="mb-3"><label class="form-label fw-semibold">Government ID type</label>{{ form.document_type }}{{ form.document_type.errors }}</div>
-      <div class="mb-3"><label class="form-label fw-semibold">Government ID (PDF, JPG, PNG)</label>{{ form.document_file }}{{ form.document_file.errors }}</div>
-      <div class="mb-3"><label class="form-label fw-semibold">Live selfie</label>{{ form.selfie_image }}{{ form.selfie_image.errors }}<div class="form-text">Use your camera or upload a clear, current photo of your face.</div>
-        <div class="mt-3 border rounded p-3 bg-light"><div class="d-flex gap-2 mb-2"><button type="button" id="startCamera" class="btn btn-sm btn-outline-secondary">Open camera</button><button type="button" id="captureSelfie" class="btn btn-sm btn-outline-success d-none">Capture live selfie</button></div><video id="cameraPreview" class="w-100 rounded d-none" autoplay playsinline></video><canvas id="selfieCanvas" class="d-none"></canvas><div id="cameraMessage" class="small text-muted">Camera capture is optional; your submitted selfie will be checked during verification.</div></div>
+    <form method="post" id="verificationForm" enctype="multipart/form-data">{% csrf_token %}
+      {{ form.selfie_data }}
+      
+      <div class="mb-4">
+        <label class="form-label fw-semibold">1. Select Document Type</label>
+        {{ form.document_type }}
+        {{ form.document_type.errors }}
       </div>
-      <div class="form-check mb-3">{{ form.consent }}<label class="form-check-label" for="{{ form.consent.id_for_label }}">{{ form.consent.label }}</label>{{ form.consent.errors }}</div>
-      <button class="btn btn-success fw-bold">Submit for verification</button>
+      
+      <div class="mb-4">
+        <label class="form-label fw-semibold">2. Upload Government ID (Required - PDF, JPG, PNG)</label>
+        {{ form.document_file }}
+        {{ form.document_file.errors }}
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">3. Live Photo Verification</label>
+        <div class="card bg-dark text-white text-center border-0 overflow-hidden" style="min-height: 240px; position: relative;">
+          <video id="webcam" autoplay playsinline class="w-100 h-100 object-fit-cover" style="display: none;"></video>
+          <canvas id="canvas" class="w-100 h-100 object-fit-cover" style="display: none;"></canvas>
+          
+          <div id="cameraPrompt" class="position-absolute top-50 start-50 translate-middle w-100 px-3">
+            <i class="bi bi-camera fs-1 mb-2"></i>
+            <p class="mb-2">We need to take a quick photo to verify your identity.</p>
+            <button type="button" id="startCamera" class="btn btn-primary btn-sm rounded-pill px-4">Enable Camera</button>
+          </div>
+          
+          <div id="cameraControls" class="position-absolute bottom-0 w-100 p-3" style="display: none; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
+            <button type="button" id="captureBtn" class="btn btn-success rounded-circle p-3 lh-1 shadow"><i class="bi bi-camera-fill fs-4"></i></button>
+            <button type="button" id="retakeBtn" class="btn btn-light rounded-pill px-4" style="display: none;">Retake Photo</button>
+          </div>
+        </div>
+        {{ form.selfie_data.errors }}
+      </div>
+
+      <div class="form-check mb-4">{{ form.consent }}<label class="form-check-label" for="{{ form.consent.id_for_label }}">{{ form.consent.label }}</label>{{ form.consent.errors }}</div>
+      <button class="btn btn-success fw-bold w-100 py-2" id="submitBtn">Submit Verification</button>
     </form>
   </div>
 </div></div></div>
 {% endblock %}
+
 {% block extra_js %}
 <script>
-(() => {
-  const input = document.getElementById('{{ form.selfie_image.id_for_label }}');
-  const start = document.getElementById('startCamera');
-  const capture = document.getElementById('captureSelfie');
-  const video = document.getElementById('cameraPreview');
-  const canvas = document.getElementById('selfieCanvas');
-  const message = document.getElementById('cameraMessage');
-  let stream;
-  start.addEventListener('click', async () => {
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user'}, audio: false});
-      video.srcObject = stream; video.classList.remove('d-none'); capture.classList.remove('d-none');
-      message.textContent = 'Center your face in good lighting, then capture your live selfie.';
-    } catch (error) { message.textContent = 'Camera access was unavailable. Upload a clear selfie image instead.'; }
-  });
-  capture.addEventListener('click', () => {
-    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    canvas.toBlob((blob) => {
-      const file = new File([blob], 'live-selfie.jpg', {type: 'image/jpeg'});
-      const files = new DataTransfer(); files.items.add(file); input.files = files.files;
-      message.textContent = 'Live selfie captured. It will be submitted with your ID.';
-      stream?.getTracks().forEach(track => track.stop());
-    }, 'image/jpeg', 0.9);
-  });
-})();
+document.addEventListener('DOMContentLoaded', function() {
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas');
+    const startBtn = document.getElementById('startCamera');
+    const captureBtn = document.getElementById('captureBtn');
+    const retakeBtn = document.getElementById('retakeBtn');
+    const cameraPrompt = document.getElementById('cameraPrompt');
+    const cameraControls = document.getElementById('cameraControls');
+    const selfieInput = document.getElementById('{{ form.selfie_data.id_for_label }}');
+    
+    let stream = null;
+
+    startBtn.addEventListener('click', async () => {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            video.srcObject = stream;
+            video.style.display = 'block';
+            cameraPrompt.style.display = 'none';
+            cameraControls.style.display = 'block';
+        } catch (err) {
+            alert('Camera access is required for verification. Please allow camera permissions.');
+        }
+    });
+
+    captureBtn.addEventListener('click', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        // Convert to base64
+        const imageData = canvas.toDataURL('image/jpeg');
+        selfieInput.value = imageData;
+        
+        // UI updates
+        video.style.display = 'none';
+        canvas.style.display = 'block';
+        captureBtn.style.display = 'none';
+        retakeBtn.style.display = 'inline-block';
+        
+        // Stop stream
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+    });
+
+    retakeBtn.addEventListener('click', async () => {
+        canvas.style.display = 'none';
+        selfieInput.value = '';
+        captureBtn.style.display = 'inline-block';
+        retakeBtn.style.display = 'none';
+        startBtn.click(); // Restart camera
+    });
+});
 </script>
 {% endblock %}

@@ -37,11 +37,23 @@
           {{ profile.get_availability_display }} for Work
         </div>
 
+        {% if not request.user.is_admin_user %}
         <div class="d-grid gap-2 mb-3">
           <a href="{% url 'messages_thread' freelancer_user.id %}" class="btn btn-hirevo">
             <i class="bi bi-chat-dots me-1"></i> Contact Freelancer
           </a>
         </div>
+        {% endif %}
+        
+        {% if request.user.is_admin_user %}
+          {% if freelancer_user.verification and freelancer_user.verification.document_file %}
+          <div class="d-grid gap-2 mb-3">
+            <a href="{% url 'admin_verification_file' freelancer_user.verification.id 'document' %}" target="_blank" class="btn btn-outline-primary">
+              <i class="bi bi-file-earmark-person me-1"></i> View Aadhaar Document
+            </a>
+          </div>
+          {% endif %}
+        {% endif %}
 
         <div class="pt-3 border-top text-start small">
           <div class="d-flex justify-content-between py-1">

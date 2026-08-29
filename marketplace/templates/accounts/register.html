@@ -67,6 +67,22 @@
           </div>
 
           <div class="mb-3">
+            <label class="form-label fw-semibold small" for="{{ form.mobile_number.id_for_label }}">Mobile Number</label>
+            {{ form.mobile_number }}
+            {% if form.mobile_number.errors %}
+              <div class="text-danger small mt-1">{{ form.mobile_number.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold small" for="{{ form.address.id_for_label }}">Address</label>
+            {{ form.address }}
+            {% if form.address.errors %}
+              <div class="text-danger small mt-1">{{ form.address.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
             <label class="form-label fw-semibold small" for="{{ form.password1.id_for_label }}">Password</label>
             {{ form.password1 }}
             {% if form.password1.errors %}

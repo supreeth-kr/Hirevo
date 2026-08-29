@@ -28,6 +28,16 @@
   --hirevo-radius-sm: 8px;
 }
 
+[data-bs-theme="dark"] {
+  --hirevo-bg: #0f172a;
+  --hirevo-card-bg: #1e293b;
+  --hirevo-text-main: #f8fafc;
+  --hirevo-text-muted: #94a3b8;
+  --hirevo-border: #334155;
+  --hirevo-primary: #f8fafc;
+  --hirevo-primary-hover: #e2e8f0;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--hirevo-bg);
@@ -49,7 +59,7 @@ h1, h2, h3, h4, h5, h6, .brand-font {
    ========================================================= */
 
 .hirevo-navbar {
-  background-color: #ffffff;
+  background-color: var(--hirevo-card-bg);
   border-bottom: 1px solid var(--hirevo-border);
   padding: 0.75rem 0;
   box-shadow: var(--hirevo-shadow-sm);
@@ -80,7 +90,7 @@ h1, h2, h3, h4, h5, h6, .brand-font {
 }
 
 .nav-category-bar {
-  background-color: #ffffff;
+  background-color: var(--hirevo-card-bg);
   border-bottom: 1px solid var(--hirevo-border);
   overflow-x: auto;
   white-space: nowrap;
@@ -253,7 +263,7 @@ h1, h2, h3, h4, h5, h6, .brand-font {
 
 .dashboard-sidebar {
   width: 260px;
-  background-color: #ffffff;
+  background-color: var(--hirevo-card-bg);
   border-right: 1px solid var(--hirevo-border);
   padding: 1.5rem 1rem;
   flex-shrink: 0;
@@ -297,7 +307,7 @@ h1, h2, h3, h4, h5, h6, .brand-font {
 }
 
 .stat-kpi-card {
-  background-color: #ffffff;
+  background-color: var(--hirevo-card-bg);
   border: 1px solid var(--hirevo-border);
   border-radius: var(--hirevo-radius);
   padding: 1.25rem;
@@ -345,7 +355,7 @@ h1, h2, h3, h4, h5, h6, .brand-font {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: var(--hirevo-card-bg);
   border: 3px solid var(--hirevo-accent);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
 }
@@ -488,3 +498,73 @@ h1, h2, h3, h4, h5, h6, .brand-font {
   }
 }
 
+/* =========================================================
+   DARK THEME GLOBAL OVERRIDES FOR UTILITY CLASSES
+   ========================================================= */
+
+[data-bs-theme="dark"] .bg-white,
+[data-bs-theme="dark"] .bg-light {
+  background-color: var(--hirevo-card-bg) !important;
+}
+
+[data-bs-theme="dark"] .text-dark,
+[data-bs-theme="dark"] .text-black,
+[data-bs-theme="dark"] h1, [data-bs-theme="dark"] h2, [data-bs-theme="dark"] h3, 
+[data-bs-theme="dark"] h4, [data-bs-theme="dark"] h5, [data-bs-theme="dark"] h6 {
+  color: var(--hirevo-text-main) !important;
+}
+
+[data-bs-theme="dark"] .text-muted,
+[data-bs-theme="dark"] .text-secondary {
+  color: var(--hirevo-text-muted) !important;
+}
+
+[data-bs-theme="dark"] .border,
+[data-bs-theme="dark"] .border-top,
+[data-bs-theme="dark"] .border-bottom,
+[data-bs-theme="dark"] .border-start,
+[data-bs-theme="dark"] .border-end {
+  border-color: var(--hirevo-border) !important;
+}
+
+[data-bs-theme="dark"] .table, 
+[data-bs-theme="dark"] .table-light,
+[data-bs-theme="dark"] .list-group-item {
+  background-color: transparent !important;
+  color: var(--hirevo-text-main) !important;
+  border-color: var(--hirevo-border) !important;
+}
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select,
+[data-bs-theme="dark"] .input-group-text {
+  background-color: var(--hirevo-bg) !important;
+  border-color: var(--hirevo-border) !important;
+  color: var(--hirevo-text-main) !important;
+}
+
+[data-bs-theme="dark"] .dropdown-menu {
+  background-color: var(--hirevo-card-bg) !important;
+  border-color: var(--hirevo-border) !important;
+}
+
+[data-bs-theme="dark"] .dropdown-item {
+  color: var(--hirevo-text-main) !important;
+}
+
+[data-bs-theme="dark"] .dropdown-item:hover {
+  background-color: var(--hirevo-bg) !important;
+  color: var(--hirevo-text-main) !important;
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link {
+  color: var(--hirevo-text-muted);
+}
+[data-bs-theme="dark"] .nav-tabs .nav-link.active {
+  background-color: var(--hirevo-card-bg) !important;
+  color: var(--hirevo-text-main) !important;
+  border-color: var(--hirevo-border) var(--hirevo-border) var(--hirevo-card-bg) !important;
+}
+[data-bs-theme="dark"] .nav-tabs {
+  border-bottom-color: var(--hirevo-border) !important;
+}

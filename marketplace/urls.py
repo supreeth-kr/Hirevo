@@ -8,6 +8,8 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('verify-otp/', views.verify_otp_view, name='verify_otp'),
     path('resend-otp/', views.resend_otp_view, name='resend_otp'),
+    path('ajax-send-aadhaar-otp/', views.ajax_send_aadhaar_otp, name='ajax_send_aadhaar_otp'),
+    path('ajax-verify-aadhaar-otp/', views.ajax_verify_aadhaar_otp, name='ajax_verify_aadhaar_otp'),
     path('login/', views.login_view, name='login'),
 
     path('admin-login/', views.admin_login_view, name='admin_login'),

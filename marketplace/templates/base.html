@@ -21,7 +21,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: #f8f9fa;
+      background-color: var(--hirevo-bg, #f8f9fa);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -57,6 +57,23 @@
       0% { transform: translateY(100%); opacity: 0; }
       100% { transform: translateY(0); opacity: 1; }
     }
+    
+    .creative-dot {
+      position: absolute;
+      top: -0.1em;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0.22em;
+      height: 0.22em;
+      background-color: #198754;
+      border-radius: 50%;
+      animation: floatDot 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes floatDot {
+      0%, 100% { transform: translate(-50%, 0) scale(1); }
+      50% { transform: translate(-50%, -0.4em) scale(1.3); background-color: #20c997; box-shadow: 0 0 15px rgba(32, 201, 151, 0.8); }
+    }
   </style>
 </head>
 <body>
@@ -64,7 +81,7 @@
   <div id="hirevo-splash">
     <div class="splash-text">
       <span class="letter">H</span>
-      <span class="letter">i</span>
+      <span class="letter" style="position: relative;">ı<span class="creative-dot"></span></span>
       <span class="letter">r</span>
       <span class="letter">e</span>
       <span class="letter">v</span>
@@ -77,7 +94,7 @@
     <div class="container">
       <a class="hirevo-brand" href="{% url 'home' %}">
         <i class="bi bi-layers-half text-success"></i>
-        <span>Hirevo</span>
+        <span>H<span style="position: relative; display: inline-block;">ı<span class="creative-dot"></span></span>revo</span>
         <span class="brand-badge">AI Smart</span>
       </a>
 
@@ -130,11 +147,13 @@
             </li>
 
             <!-- Messages Link -->
+            {% if not user.is_admin_user %}
             <li class="nav-item">
               <a class="nav-link px-2" href="{% url 'messages_inbox' %}" title="Messages">
                 <i class="bi bi-chat-dots-fill fs-5"></i>
               </a>
             </li>
+            {% endif %}
 
             <!-- Role-Specific Portal Button -->
             {% if user.is_admin_user %}
@@ -278,7 +297,7 @@
         <div class="col-lg-4">
           <div class="hirevo-brand mb-3 text-white">
             <i class="bi bi-layers-half text-success"></i>
-            <span>Hirevo</span>
+            <span>H<span style="position: relative; display: inline-block;">ı<span class="creative-dot"></span></span>revo</span>
             <span class="brand-badge">Marketplace</span>
           </div>
           <p class="small text-secondary mb-3">

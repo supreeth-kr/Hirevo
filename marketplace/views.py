@@ -25,7 +25,8 @@ from .forms import (
 from .permissions import client_required, freelancer_required, admin_required
 from .services import (
     create_notification, add_project_history, check_and_apply_delays,
-    assign_backup_freelancer, calculate_freelancer_earnings
+    assign_backup_freelancer, calculate_freelancer_earnings,
+    GovernmentIDVerificationService
 )
 from .ai_recommendation import recommend_freelancers, recommend_gigs
 from .emails import send_registration_otp_email
@@ -69,6 +70,8 @@ def register_view(request):
                 'email': user.email,
                 'role': user.role,
                 'password_hash': user.password,
+                'mobile_number': user.mobile_number,
+                'address': user.address,
             }
 
             # Generate 6-digit OTP
@@ -162,6 +165,8 @@ def verify_otp_view(request):
                         full_name=pending['full_name'],
                         role=pending['role'],
                         password=pending['password_hash'],
+                        mobile_number=pending.get('mobile_number', ''),
+                        address=pending.get('address', ''),
                         is_active=True,
                         is_email_verified=True
                     )
@@ -174,6 +179,7 @@ def verify_otp_view(request):
 
                     # Clear session staging
                     request.session.pop('pending_registration', None)
+                    request.session.pop('aadhaar_verified', None)
 
                     # Auto login
                     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
@@ -185,7 +191,8 @@ def verify_otp_view(request):
                     if user.is_client():
                         return redirect('client_dashboard')
                     elif user.is_freelancer():
-                        return redirect('freelancer_dashboard')
+                        # Redirect directly to identity verification for onboarding
+                        return redirect('freelancer_verification')
                     return redirect('home')
     else:
         form = OTPVerificationForm()
@@ -1275,20 +1282,28 @@ def freelancer_gig_create_view(request):
 
 @freelancer_required
 def freelancer_verification_view(request):
+    import base64
+    from django.core.files.base import ContentFile
+    
     verification = getattr(request.user, 'verification', None)
     if request.method == 'POST':
         form = FreelancerVerificationForm(request.POST, request.FILES, instance=verification)
         if form.is_valid():
             verification = form.save(commit=False)
             verification.user = request.user
-            # A capture is stored for review. A production liveness/face check must
-            # be performed by a configured KYC provider before approval.
+            
+            # Process selfie data
+            selfie_data = form.cleaned_data['selfie_data']
+            format, imgstr = selfie_data.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(imgstr), name=f'selfie_{request.user.id}.{ext}')
+            verification.selfie_image = data
+            
             verification.status = FreelancerVerification.STATUS_PENDING
             verification.liveness_status = FreelancerVerification.STATUS_PENDING
-            verification.reviewer_notes = ''
             verification.reviewed_at = None
             verification.save()
-            messages.success(request, "Identity documents submitted. Liveness and ID checks are pending review.")
+            messages.success(request, 'Verification documents and live photo submitted successfully. Pending manual review.')
             return redirect('freelancer_verification')
     else:
         form = FreelancerVerificationForm(instance=verification)
@@ -1598,7 +1613,7 @@ def admin_dashboard_view(request):
 
     recent_orders = Order.objects.select_related('client', 'freelancer', 'gig').order_by('-created_at')[:6]
     delayed_projects = Order.objects.filter(status=Order.STATUS_DELAYED).select_related('client', 'freelancer', 'gig')[:5]
-    recent_users = User.objects.order_by('-date_joined')[:6]
+    recent_users = User.objects.exclude(role=User.ROLE_ADMIN).exclude(is_superuser=True).exclude(is_staff=True).order_by('-date_joined')[:6]
     recent_payments = Payment.objects.select_related('client', 'freelancer', 'order').order_by('-created_at')[:5]
 
     return render(request, 'administrator/dashboard.html', {
@@ -1612,7 +1627,7 @@ def admin_dashboard_view(request):
 
 @admin_required
 def admin_users_view(request):
-    users = User.objects.all().order_by('-date_joined')
+    users = User.objects.exclude(role=User.ROLE_ADMIN).exclude(is_superuser=True).exclude(is_staff=True).order_by('-date_joined')
     role_filter = request.GET.get('role')
     query = request.GET.get('q', '').strip()
 
@@ -2010,3 +2025,35 @@ def custom_403_view(request, exception=None):
 
 def custom_500_view(request):
     return render(request, 'errors/500.html', status=500)
+
+from django.http import JsonResponse
+from .services import CashfreeAadhaarService
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def ajax_send_aadhaar_otp(request):
+    if request.method == 'POST':
+        aadhaar_number = request.POST.get('aadhaar_number')
+        if not aadhaar_number or len(aadhaar_number) != 12:
+            return JsonResponse({'success': False, 'message': 'Invalid Aadhaar number'})
+            
+        result = CashfreeAadhaarService.send_otp(aadhaar_number)
+        if result.get('success'):
+            request.session['aadhaar_ref_id'] = result.get('ref_id')
+        return JsonResponse(result)
+    return JsonResponse({'success': False, 'message': 'Invalid request'})
+
+@csrf_exempt
+def ajax_verify_aadhaar_otp(request):
+    if request.method == 'POST':
+        otp = request.POST.get('otp')
+        ref_id = request.session.get('aadhaar_ref_id')
+        
+        if not otp or not ref_id:
+            return JsonResponse({'success': False, 'message': 'Missing OTP or Ref ID'})
+            
+        result = CashfreeAadhaarService.verify_otp(ref_id, otp)
+        if result.get('success'):
+            request.session['aadhaar_verified'] = True
+        return JsonResponse(result)
+    return JsonResponse({'success': False, 'message': 'Invalid request'})
