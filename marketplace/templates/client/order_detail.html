@@ -18,10 +18,19 @@
       <a href="{% url 'messages_thread' order.freelancer.id %}" class="btn btn-hirevo-outline btn-sm">
         <i class="bi bi-chat-dots me-1"></i> Message Freelancer
       </a>
+      {% if backup %}
+      <a href="{% url 'messages_thread' backup.backup_freelancer.id %}" class="btn btn-info btn-sm text-dark fw-bold">
+        <i class="bi bi-chat-dots me-1"></i> Message Backup Freelancer
+      </a>
+      {% endif %}
       {% if payment and payment.status != 'paid' %}
-        <a href="{% url 'simulated_payment' order.id %}" class="btn btn-hirevo btn-sm">
-          <i class="bi bi-credit-card me-1"></i> Complete Payment (₹{{ order.price }})
-        </a>
+        {% if order.is_overdue %}
+          <span class="text-danger small fw-bold mt-1 px-2 py-1 bg-danger bg-opacity-10 rounded">Time has finished. Start a new gig to proceed.</span>
+        {% else %}
+          <a href="{% url 'simulated_payment' order.id %}" class="btn btn-hirevo btn-sm">
+            <i class="bi bi-credit-card me-1"></i> Complete Payment (₹{{ order.price }})
+          </a>
+        {% endif %}
       {% endif %}
     </div>
   </div>
@@ -243,7 +252,13 @@
           {% if payment and payment.status == 'paid' %}
             <div class="small text-muted">Transaction: <code class="text-dark">{{ payment.transaction_id }}</code></div>
           {% else %}
-            <a href="{% url 'simulated_payment' order.id %}" class="btn btn-hirevo btn-sm w-100 mt-2">Pay Now (₹{{ order.price }})</a>
+            {% if order.is_overdue %}
+              <div class="alert alert-danger p-2 mt-2 text-center small mb-0 fw-bold">
+                Time has finished. Start a new gig to proceed.
+              </div>
+            {% else %}
+              <a href="{% url 'simulated_payment' order.id %}" class="btn btn-hirevo btn-sm w-100 mt-2">Pay Now (₹{{ order.price }})</a>
+            {% endif %}
           {% endif %}
         </div>
       </div>

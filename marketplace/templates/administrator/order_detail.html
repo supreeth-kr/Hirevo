@@ -10,9 +10,15 @@
       <span class="badge-status {{ order.status }}">{{ order.get_status_display }}</span>
     </div>
     {% if order.status == 'delayed' %}
-      <a href="{% url 'admin_assign_backup' order.id %}" class="btn btn-danger btn-sm fw-bold">
-        <i class="bi bi-person-plus-fill me-1"></i> Assign Backup Freelancer
-      </a>
+      {% if order.backup_assignments.all %}
+        <span class="btn btn-secondary btn-sm fw-bold disabled">
+          <i class="bi bi-person-check-fill me-1"></i> Assigned Backup
+        </span>
+      {% else %}
+        <a href="{% url 'admin_assign_backup' order.id %}" class="btn btn-danger btn-sm fw-bold">
+          <i class="bi bi-person-plus-fill me-1"></i> Assign Backup Freelancer
+        </a>
+      {% endif %}
     {% endif %}
   </div>
 

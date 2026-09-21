@@ -1,6 +1,8 @@
 from django.utils import timezone
 from django.db import transaction
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.conf import settings
 from .models import Order, Penalty, Notification, ProjectHistory, BackupAssignment, Payment, RevisionCharge
 
 
@@ -78,12 +80,26 @@ def check_and_apply_delays():
                 # Notify Admins
                 admins = User.objects.filter(is_staff=True) | User.objects.filter(role=User.ROLE_ADMIN)
                 for admin in admins.distinct():
+                    msg = f"Order {order.order_id} ({order.gig.title}) is delayed. Primary freelancer: {order.freelancer.username}. Backup assignment required."
                     create_notification(
                         user=admin,
                         title="Delayed Project Alert",
-                        message=f"Order {order.order_id} ({order.gig.title}) is delayed. Primary freelancer: {order.freelancer.username}. Backup assignment required.",
+                        message=msg,
                         link=f"/admin-dashboard/orders/{order.id}/assign-backup/"
                     )
+                    
+                    # Send email alert to admin
+                    if admin.email:
+                        try:
+                            send_mail(
+                                'Action Required: Delayed Project Alert',
+                                f"Hello {admin.username},\n\n{msg}\n\nPlease log in to assign a backup freelancer.",
+                                settings.DEFAULT_FROM_EMAIL,
+                                [admin.email],
+                                fail_silently=True,
+                            )
+                        except Exception:
+                            pass
 
                 # Notify Primary Freelancer
                 create_notification(

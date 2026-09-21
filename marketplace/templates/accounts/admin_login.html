@@ -5,10 +5,10 @@
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-md-7 col-lg-5">
-      
+
       <!-- Admin Security Portal Card -->
       <div class="card border-0 shadow-lg bg-dark text-white rounded-4 overflow-hidden">
-        
+
         <!-- Top Security Header Bar -->
         <div class="bg-danger bg-gradient p-3 text-center d-flex align-items-center justify-content-center gap-2">
           <i class="bi bi-shield-lock-fill fs-4 text-white"></i>
@@ -41,17 +41,18 @@
           </div>
 
           {% if logged_in_non_admin %}
-            <div class="alert alert-warning py-2 small mb-3">
-              <i class="bi bi-exclamation-triangle-fill me-1"></i>
-              You are currently signed in with a regular client/freelancer account. Please <a href="{% url 'logout' %}" class="alert-link">logout here</a> first to sign in as Administrator.
-            </div>
+          <div class="alert alert-warning py-2 small mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+            You are currently signed in with a regular client/freelancer account. Please <a href="{% url 'logout' %}"
+              class="alert-link">logout here</a> first to sign in as Administrator.
+          </div>
           {% endif %}
 
           <!-- Authentication Form -->
           <form method="post" action="{% url 'admin_login' %}{% if next %}?next={{ next }}{% endif %}">
             {% csrf_token %}
             {% if next %}
-              <input type="hidden" name="next" value="{{ next }}">
+            <input type="hidden" name="next" value="{{ next }}">
             {% endif %}
 
             <div class="mb-3">
@@ -60,7 +61,7 @@
               </label>
               {{ form.username }}
               {% if form.username.errors %}
-                <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+              <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
               {% endif %}
             </div>
 
@@ -70,14 +71,14 @@
               </label>
               {{ form.password }}
               {% if form.password.errors %}
-                <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+              <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
               {% endif %}
             </div>
 
             {% if form.non_field_errors %}
-              <div class="alert alert-danger py-2 small mb-3">
-                {{ form.non_field_errors.0 }}
-              </div>
+            <div class="alert alert-danger py-2 small mb-3">
+              {{ form.non_field_errors.0 }}
+            </div>
             {% endif %}
 
             <button type="submit" class="btn btn-danger w-100 py-2 fw-bold shadow-sm mb-3">

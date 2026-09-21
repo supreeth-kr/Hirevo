@@ -133,3 +133,7 @@ SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
 CASHFREE_CLIENT_ID = os.getenv('CASHFREE_CLIENT_ID', 'placeholder_client_id')
 CASHFREE_CLIENT_SECRET = os.getenv('CASHFREE_CLIENT_SECRET', 'placeholder_client_secret')
 CASHFREE_ENV = os.getenv('CASHFREE_ENV', 'TEST') # Set to PROD for real verification
+
+# Razorpay Integration
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', 'rzp_test_placeholder_key')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', 'placeholder_secret')

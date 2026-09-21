@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Simulated Escrow Payment - Hirevo{% endblock %}
+{% block title %}Escrow Payment - Hirevo{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -8,10 +8,10 @@
       <div class="hirevo-card p-4 p-md-5">
         <div class="text-center mb-4">
           <div class="stat-kpi-icon bg-success bg-opacity-10 text-success mx-auto mb-2" style="width: 50px; height: 50px;">
-            <i class="bi bi-shield-lock fs-3"></i>
+            <i class="bi bi-shield-check fs-3"></i>
           </div>
-          <h4 class="fw-bold mb-1">Simulated Escrow Payment</h4>
-          <span class="badge bg-warning text-dark fw-bold px-3 py-1">Simulation Mode</span>
+          <h4 class="fw-bold mb-1">Secure Escrow Payment</h4>
+          <span class="badge bg-primary text-white fw-bold px-3 py-1">Razorpay Integration</span>
         </div>
 
         <div class="p-3 bg-light rounded mb-4">
@@ -33,41 +33,17 @@
           </div>
         </div>
 
-        <form method="post">
-          {% csrf_token %}
-
-          <div class="mb-3">
-            <label class="form-label small fw-semibold">Cardholder Name (Simulated)</label>
-            <input type="text" class="form-control" value="{{ user.full_name|default:user.username }}" readonly>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label small fw-semibold">Simulated Card Number</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
-              <input type="text" class="form-control" value="•••• •••• •••• 4242" readonly>
-            </div>
-          </div>
-
-          <div class="row g-2 mb-4">
-            <div class="col-6">
-              <label class="form-label small fw-semibold">Expiry</label>
-              <input type="text" class="form-control" value="12/28" readonly>
-            </div>
-            <div class="col-6">
-              <label class="form-label small fw-semibold">CVV</label>
-              <input type="text" class="form-control" value="888" readonly>
-            </div>
-          </div>
-
-          <div class="alert alert-info small py-2 mb-4">
-            <i class="bi bi-info-circle me-1"></i> No real credit card or bank details are charged. Clicking below verifies your order and creates an escrow transaction record.
-          </div>
-
-          <button type="submit" class="btn btn-hirevo w-100 py-2 fw-bold">
-            <i class="bi bi-lock-fill me-1"></i> Pay ₹{{ order.price }} (Simulation)
-          </button>
+        <!-- Hidden form to submit payment details to the backend after successful payment -->
+        <form action="{% url 'payment_verify' %}" method="POST" id="payment-form" style="display: none;">
+            {% csrf_token %}
+            <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+            <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+            <input type="hidden" name="razorpay_signature" id="razorpay_signature">
         </form>
+
+        <button id="rzp-button1" class="btn btn-hirevo w-100 py-2 fw-bold">
+          <i class="bi bi-credit-card me-1"></i> Pay ₹{{ order.price }} with Razorpay
+        </button>
 
         <div class="text-center pt-3 border-top mt-3">
           <a href="{% url 'client_order_detail' order.id %}" class="small text-muted text-decoration-none">
@@ -78,4 +54,46 @@
     </div>
   </div>
 </div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+{% if razorpay_key_id == 'rzp_test_placeholder_key' %}
+document.getElementById('rzp-button1').onclick = function(e){
+    e.preventDefault();
+    document.getElementById('razorpay_order_id').value = "{{ razorpay_order_id }}";
+    document.getElementById('razorpay_payment_id').value = "sim_pay_" + Math.random().toString(36).substring(2, 15);
+    document.getElementById('razorpay_signature').value = "sim_sig_xyz";
+    document.getElementById('payment-form').submit();
+}
+{% else %}
+var options = {
+    "key": "{{ razorpay_key_id }}",
+    "amount": "{{ amount }}",
+    "currency": "INR",
+    "name": "Hirevo Marketplace",
+    "description": "Secure Escrow Payment for {{ order.gig.title }}",
+    "order_id": "{{ razorpay_order_id }}",
+    "handler": function (response){
+        // Populate the hidden form and submit it to verify the signature
+        document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+        document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+        document.getElementById('razorpay_signature').value = response.razorpay_signature;
+        document.getElementById('payment-form').submit();
+    },
+    "prefill": {
+        "name": "{{ request.user.full_name|default:request.user.username }}",
+        "email": "{{ request.user.email }}",
+        "contact": "{{ request.user.mobile_number|default:'' }}"
+    },
+    "theme": {
+        "color": "#4a6cf7"
+    }
+};
+var rzp1 = new Razorpay(options);
+document.getElementById('rzp-button1').onclick = function(e){
+    rzp1.open();
+    e.preventDefault();
+}
+{% endif %}
+</script>
 {% endblock %}

@@ -39,6 +39,7 @@ urlpatterns = [
     path('client/payments/', views.client_payments_view, name='client_payments'),
     path('client/reviews/', views.client_reviews_view, name='client_reviews'),
     path('orders/<int:order_id>/pay/', views.simulated_payment_view, name='simulated_payment'),
+    path('payment/verify/', views.payment_verify_view, name='payment_verify'),
 
     # Freelancer Workflow
     path('freelancer/dashboard/', views.freelancer_dashboard_view, name='freelancer_dashboard'),

@@ -1,4 +1,6 @@
 import secrets
+import razorpay
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
@@ -8,6 +10,7 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden, JsonResponse, FileResponse
 from django.forms import modelformset_factory
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import (
     User, Category, Skill, FreelancerProfile, ClientProfile,
@@ -865,13 +868,83 @@ def simulated_payment_view(request, order_id):
             'status': Payment.STATUS_PENDING,
         }
     )
+    
+    if payment.status == Payment.STATUS_PAID:
+        messages.info(request, "This order is already paid.")
+        return redirect('client_order_detail', order_id=order.id)
 
-    if request.method == 'POST':
+    if order.is_overdue():
+        messages.error(request, "Time has finished. Please start a new gig to proceed.")
+        return redirect('client_order_detail', order_id=order.id)
+
+    # Initialize Razorpay Client
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+    amount_in_paise = int(order.price * 100)
+    
+    if not payment.razorpay_order_id:
+        if settings.RAZORPAY_KEY_ID == 'rzp_test_placeholder_key':
+            import uuid
+            payment.razorpay_order_id = f"sim_order_{uuid.uuid4().hex[:10]}"
+            payment.save(update_fields=['razorpay_order_id'])
+        else:
+            # Create Razorpay Order
+            payment_data = {
+                "amount": amount_in_paise,
+                "currency": "INR",
+                "receipt": f"receipt_order_{order.id}",
+                "payment_capture": 1 # Auto-capture payment
+            }
+            try:
+                razorpay_order = client.order.create(data=payment_data)
+                payment.razorpay_order_id = razorpay_order['id']
+                payment.save(update_fields=['razorpay_order_id'])
+            except Exception as e:
+                messages.error(request, f"Failed to initialize payment gateway. Error: {str(e)}")
+                return redirect('client_order_detail', order_id=order.id)
+
+    return render(request, 'client/payment_simulate.html', {
+        'order': order,
+        'payment': payment,
+        'razorpay_order_id': payment.razorpay_order_id,
+        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        'amount': amount_in_paise,
+    })
+
+
+@csrf_exempt
+def payment_verify_view(request):
+    if request.method == "POST":
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
+        
+        try:
+            payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
+            order = payment.order
+        except Payment.DoesNotExist:
+            messages.error(request, "Payment record not found.")
+            return redirect('client_dashboard')
+
+        if settings.RAZORPAY_KEY_ID != 'rzp_test_placeholder_key':
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            try:
+                client.utility.verify_payment_signature({
+                    'razorpay_order_id': razorpay_order_id,
+                    'razorpay_payment_id': razorpay_payment_id,
+                    'razorpay_signature': razorpay_signature
+                })
+            except Exception as e:
+                messages.error(request, f"Payment verification error: {str(e)}")
+                return redirect('client_order_detail', order_id=order.id)
+            
+        # Signature is valid (or simulated). Mark order as paid.
         payment.status = Payment.STATUS_PAID
+        payment.razorpay_payment_id = razorpay_payment_id
+        payment.razorpay_signature = razorpay_signature
         payment.paid_at = timezone.now()
         payment.save()
-
-        # Update order status if still pending
+        
         if order.status == Order.STATUS_PENDING:
             order.status = Order.STATUS_ACCEPTED
             order.save(update_fields=['status', 'updated_at'])
@@ -879,24 +952,21 @@ def simulated_payment_view(request, order_id):
         add_project_history(
             order=order,
             action="Payment Completed",
-            description=f"Simulated payment of ₹{payment.amount} completed via Transaction ID {payment.transaction_id}.",
-            performed_by=request.user
+            description=f"Payment of ₹{payment.amount} securely completed via Razorpay.",
+            performed_by=payment.client
         )
 
         create_notification(
             user=order.freelancer,
             title="Payment Verified",
-            message=f"Simulated payment of ₹{payment.amount} confirmed for order {order.order_id}. Project is now active.",
+            message=f"Escrow payment of ₹{payment.amount} confirmed for order {order.order_id}. Project is now active.",
             link=f"/freelancer/orders/{order.id}/"
         )
 
-        messages.success(request, f"Simulated payment of ₹{payment.amount} successful! Transaction ID: {payment.transaction_id}")
+        messages.success(request, "Payment Successful! Your funds are securely in escrow.")
         return redirect('client_order_detail', order_id=order.id)
-
-    return render(request, 'client/payment_simulate.html', {
-        'order': order,
-        'payment': payment,
-    })
+            
+    return redirect('client_dashboard')
 
 
 @client_required
@@ -1605,7 +1675,7 @@ def admin_dashboard_view(request):
         'total_orders': Order.objects.count(),
         'active_orders': Order.objects.filter(status__in=[Order.STATUS_ACCEPTED, Order.STATUS_IN_PROGRESS, Order.STATUS_SUBMITTED, Order.STATUS_REVISION, Order.STATUS_BACKUP]).count(),
         'completed_orders': Order.objects.filter(status=Order.STATUS_COMPLETED).count(),
-        'delayed_orders': Order.objects.filter(status=Order.STATUS_DELAYED).count(),
+        'delayed_orders': Order.objects.filter(status=Order.STATUS_DELAYED, backup_assignments__isnull=True).count(),
         'total_payments': Payment.objects.filter(status=Payment.STATUS_PAID).aggregate(s=Sum('amount'))['s'] or 0,
         'total_penalties': Penalty.objects.filter(status=Penalty.STATUS_APPLIED).aggregate(s=Sum('penalty_amount'))['s'] or 0,
         'backup_assignments': BackupAssignment.objects.count(),
