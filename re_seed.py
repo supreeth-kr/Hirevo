@@ -34,7 +34,7 @@ def run():
 
     print("Creating gigs for existing freelancers with different prices...")
     gig_count = 1
-    base_price = 100
+    base_price = 1000
 
     for category in categories:
         for i in range(2):
